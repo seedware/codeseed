@@ -11,7 +11,7 @@ Codeseed 是一个用于在项目中管理 agent skills 的命令行工具。
 ## 安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
 ## 规划方向

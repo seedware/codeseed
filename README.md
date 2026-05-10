@@ -13,7 +13,7 @@ Built-in preset skills live in [presets/](presets/).
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
 ## Planned Direction

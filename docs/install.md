@@ -17,7 +17,7 @@ Codeseed installs into the user's home directory by default:
 ## Install From A Shell Script
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
 The installer checks the current environment:
@@ -48,4 +48,3 @@ After installation, make sure `~/.codeseed/bin` is in `PATH`:
 ```bash
 export PATH="$HOME/.codeseed/bin:$PATH"
 ```
-

@@ -17,7 +17,7 @@ Codeseed 默认安装到用户主目录：
 ## 通过 Shell 脚本安装
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
 安装脚本会检查当前环境：
@@ -48,4 +48,3 @@ curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/main/scripts/inst
 ```bash
 export PATH="$HOME/.codeseed/bin:$PATH"
 ```
-
