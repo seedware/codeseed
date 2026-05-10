@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "agentDir": ".agent",
+  "codeseedDir": ".codeseed",
+  "installedSkills": [
+    { "id": "codeseed-skill-author", "source": "preset:codeseed-skill-author", "target": "common" }
+  ]
+}

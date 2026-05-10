@@ -4,6 +4,7 @@ Codeseed 是一个用于在项目中管理 agent skills 的命令行工具。
 
 当前项目阶段是产品和架构探索。初始项目说明见 [docs/project-brief.zh-CN.md](docs/project-brief.zh-CN.md)。
 初始命令行界面见 [docs/cli.zh-CN.md](docs/cli.zh-CN.md)。
+项目内 skill 目录结构见 [docs/skill-layout.zh-CN.md](docs/skill-layout.zh-CN.md)。
 内置预置 skills 存放在 [presets/](presets/)。
 
 ## 规划方向
