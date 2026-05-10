@@ -34,11 +34,13 @@ codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-li
 
 ### `codeseed add <SOURCE>`
 
-从 SkillHub、GitHub、URL、文件或目录添加 skill。
+从 Codeseed 预置 skills、SkillHub、GitHub、URL、文件或目录添加 skill。
 
 ```text
 codeseed add <SOURCE> [--hub <URL>] [--name <NAME>] [--target <TARGET>] [--target-dir <DIR>] [--force]
 ```
+
+来源可以是 `preset:<skill-id>`、SkillHub id、GitHub reference、URL、本地文件或本地目录。
 
 选项：
 
@@ -106,4 +108,3 @@ codeseed sync [--dry-run] [--check] [--prune]
 3. `--prune`：当过期生成文件仍归 Codeseed 所有时，移除它们。
 
 `--dry-run` 和 `--check` 互斥。
-

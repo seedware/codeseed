@@ -6,6 +6,7 @@ Chinese version: [README.zh-CN.md](README.zh-CN.md).
 
 The current project phase is product and architecture discovery. The initial brief is in [docs/project-brief.md](docs/project-brief.md).
 The initial CLI surface is documented in [docs/cli.md](docs/cli.md).
+Built-in preset skills live in [presets/](presets/).
 
 ## Planned Direction
 

@@ -12,7 +12,7 @@ In its current form, Codeseed should focus on local project initialization and s
 
 1. `codeseed init` initializes the current directory for agent skill management.
 2. Initialization creates a `.agent` directory with the required skill directory structure.
-3. Initialization installs a small set of built-in preset skills.
+3. Initialization installs a small set of built-in preset skills from the repository `presets/skills/` directory.
 4. Initialization creates compatibility symlinks for common agents, including Claude Code, Codex, Cursor, and similar tools.
 5. `codeseed add` and `codeseed rm` manage skills after initialization.
 6. Skill placement is driven by skill configuration, so Codeseed can put each skill in the correct target directory.
@@ -143,6 +143,19 @@ Possible compatibility targets:
 
 The implementation should treat symlinks as generated artifacts. `doctor` should be able to detect broken or incorrect symlinks, and `sync` should be able to restore them.
 
+## Preset Skill Model
+
+Codeseed stores built-in preset skills in `presets/skills/`.
+
+Preset skills are part of the normal skill source model:
+
+1. `codeseed init` installs the default preset set unless `--no-presets` is used.
+2. `codeseed add preset:<skill-id>` installs a preset skill explicitly.
+3. `codeseed rm <skill>` removes an installed preset skill the same way it removes any other managed skill.
+4. `codeseed doctor` validates installed preset skills with the same manifest rules as other skills.
+
+Each preset skill should include `skill.toml`, `SKILL.md`, and `SKILL.zh-CN.md`.
+
 ## Skill Source Model
 
 Every skill source should be normalized into an internal resolved skill package before installation.
@@ -160,7 +173,7 @@ input source
   -> state recorder
 ```
 
-This keeps `add` behavior consistent whether the skill comes from SkillHub, GitHub, a URL, or a local path.
+This keeps `add` behavior consistent whether the skill comes from Codeseed presets, SkillHub, GitHub, a URL, or a local path.
 
 ## State And Git Model
 

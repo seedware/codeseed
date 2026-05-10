@@ -34,11 +34,13 @@ Options:
 
 ### `codeseed add <SOURCE>`
 
-Adds a skill from SkillHub, GitHub, URL, file, or directory.
+Adds a skill from Codeseed presets, SkillHub, GitHub, URL, file, or directory.
 
 ```text
 codeseed add <SOURCE> [--hub <URL>] [--name <NAME>] [--target <TARGET>] [--target-dir <DIR>] [--force]
 ```
+
+Sources can include `preset:<skill-id>`, a SkillHub id, GitHub reference, URL, local file, or local directory.
 
 Options:
 
@@ -106,4 +108,3 @@ Options:
 3. `--prune`: remove stale generated files when they are still owned by Codeseed.
 
 `--dry-run` and `--check` are mutually exclusive.
-

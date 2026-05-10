@@ -10,7 +10,7 @@ Codeseed 是一个命令行工具，用于管理目标项目中的 agent skills�
 
 1. `codeseed init` 用于在当前目录初始化 agent skill 管理能力。
 2. 初始化时创建 `.agent` 目录，以及必要的 skill 目录结构。
-3. 初始化时安装少量内置预置 skill。
+3. 初始化时从仓库内的 `presets/skills/` 目录安装少量内置预置 skill。
 4. 初始化时为常见 agent 创建兼容软链接，包括 Claude Code、Codex、Cursor，以及类似工具。
 5. 后续通过 `codeseed add` 和 `codeseed rm` 管理 skill。
 6. skill 的放置位置由 skill 配置驱动，因此 Codeseed 可以把每个 skill 放到正确的目标目录。
@@ -141,6 +141,19 @@ Codeseed 应该把同一份底层受管理 skill 内容暴露给多个 agent 工
 
 实现时应把软链接视为生成产物。`doctor` 应能检测损坏或错误的软链接，`sync` 应能恢复它们。
 
+## 预置 Skill 模型
+
+Codeseed 把内置预置 skills 存放在 `presets/skills/`。
+
+预置 skills 是普通 skill 来源模型的一部分：
+
+1. `codeseed init` 默认安装预置集合，除非用户使用 `--no-presets`。
+2. `codeseed add preset:<skill-id>` 可以显式安装某个预置 skill。
+3. `codeseed rm <skill>` 可以像移除其它受管理 skill 一样移除已安装的预置 skill。
+4. `codeseed doctor` 使用与其它 skill 相同的 manifest 规则验证已安装的预置 skill。
+
+每个预置 skill 都应该包含 `skill.toml`、`SKILL.md` 和 `SKILL.zh-CN.md`。
+
 ## Skill 来源模型
 
 每一种 skill 来源都应该先被标准化为内部 resolved skill package，然后再安装。
@@ -158,7 +171,7 @@ Codeseed 应该把同一份底层受管理 skill 内容暴露给多个 agent 工
   -> 状态记录器
 ```
 
-这样无论 skill 来自 SkillHub、GitHub、URL 还是本地路径，`add` 行为都能保持一致。
+这样无论 skill 来自 Codeseed 预置集合、SkillHub、GitHub、URL 还是本地路径，`add` 行为都能保持一致。
 
 ## 状态与 Git 模型
 

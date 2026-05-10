@@ -23,7 +23,7 @@ pub enum Command {
     /// Initialize Codeseed in the current or specified project directory.
     Init(InitCommand),
 
-    /// Add a skill from SkillHub, GitHub, URL, file, or directory.
+    /// Add a skill from presets, SkillHub, GitHub, URL, file, or directory.
     Add(AddCommand),
 
     /// Remove an installed Codeseed-managed skill.
@@ -62,7 +62,7 @@ pub struct InitCommand {
 
 #[derive(Debug, Args)]
 pub struct AddCommand {
-    /// Skill source. This can be a SkillHub id, URL, local file, local directory, or GitHub reference.
+    /// Skill source. This can be preset:<id>, a SkillHub id, URL, local file, local directory, or GitHub reference.
     #[arg(value_name = "SOURCE")]
     pub source: String,
 
