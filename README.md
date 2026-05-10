@@ -5,6 +5,7 @@ Codeseed is a command-line tool for managing agent skills inside a project.
 Chinese version: [README.zh-CN.md](README.zh-CN.md).
 
 The current project phase is product and architecture discovery. The initial brief is in [docs/project-brief.md](docs/project-brief.md).
+The initial CLI surface is documented in [docs/cli.md](docs/cli.md).
 
 ## Planned Direction
 
