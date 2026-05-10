@@ -3,6 +3,7 @@
   "agentDir": ".agent",
   "codeseedDir": ".codeseed",
   "installedSkills": [
+    { "id": "codeseed-multi-git-remote", "source": "preset:codeseed-multi-git-remote", "target": "common" },
     { "id": "codeseed-skill-author", "source": "preset:codeseed-skill-author", "target": "common" }
   ]
 }

@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use crate::cli::InitCommand;
 use crate::error::{CodeseedError, Result};
-use crate::presets::{DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
+use crate::presets::{BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
 
 const COMMON_TARGET: &str = "common";
 const AGENT_TARGETS: &[&str] = &["common", "codex", "claude", "cursor"];
@@ -47,7 +47,7 @@ pub fn run(project: &Path, command: &InitCommand) -> Result<InitReport> {
         &codeseed_dir,
         &command.agent_dir,
         &command.codeseed_dir,
-        &report,
+        &report.installed_skills,
     )?;
 
     if !command.no_links {
@@ -57,7 +57,7 @@ pub fn run(project: &Path, command: &InitCommand) -> Result<InitReport> {
     Ok(report)
 }
 
-fn normalize_project(project: &Path) -> PathBuf {
+pub(crate) fn normalize_project(project: &Path) -> PathBuf {
     if project.as_os_str().is_empty() {
         current_dir_or_dot()
     } else {
@@ -229,7 +229,11 @@ fn codeseed_state_path(codeseed_dir: &Path) -> PathBuf {
     codeseed_dir.join("state.json")
 }
 
-fn create_dir(path: impl AsRef<Path>, force: bool, report: &mut InitReport) -> Result<()> {
+pub(crate) fn create_dir(
+    path: impl AsRef<Path>,
+    force: bool,
+    report: &mut InitReport,
+) -> Result<()> {
     let path = path.as_ref();
     if path.is_dir() {
         return Ok(());
@@ -251,15 +255,34 @@ fn create_dir(path: impl AsRef<Path>, force: bool, report: &mut InitReport) -> R
 
 fn install_default_presets(agent_dir: &Path, force: bool, report: &mut InitReport) -> Result<()> {
     for skill_id in DEFAULT_PRESET_SKILL_IDS {
-        let source = Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join(PRESET_SKILLS_DIR)
-            .join(skill_id);
-        let destination = agent_skill_path(agent_dir, skill_id);
-
-        copy_dir(&source, &destination, force)?;
+        install_preset_skill(agent_dir, skill_id, force)?;
         report.installed_skills.push((*skill_id).to_string());
     }
     Ok(())
+}
+
+pub(crate) fn install_preset_skill(agent_dir: &Path, skill_id: &str, force: bool) -> Result<()> {
+    if !BUILT_IN_PRESET_SKILL_IDS.contains(&skill_id) {
+        return Err(CodeseedError::conflict(
+            skill_id,
+            "is not a built-in preset skill",
+        ));
+    }
+
+    let source = preset_skill_source(skill_id);
+    let destination = agent_skill_path(agent_dir, skill_id);
+
+    copy_dir(&source, &destination, force)
+}
+
+fn preset_skill_source(skill_id: &str) -> PathBuf {
+    let local_source = current_dir_or_dot().join(PRESET_SKILLS_DIR).join(skill_id);
+    if local_source.is_dir() {
+        return local_source;
+    }
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(PRESET_SKILLS_DIR)
+        .join(skill_id)
 }
 
 fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
@@ -290,15 +313,14 @@ fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
     Ok(())
 }
 
-fn write_state_file(
+pub(crate) fn write_state_file(
     codeseed_dir: &Path,
     agent_dir: &Path,
     codeseed_dir_arg: &Path,
-    report: &InitReport,
+    skill_ids: &[String],
 ) -> Result<()> {
     let path = codeseed_state_path(codeseed_dir);
-    let skills = report
-        .installed_skills
+    let skills = skill_ids
         .iter()
         .map(|skill| format!("    {{ \"id\": \"{skill}\", \"source\": \"preset:{skill}\", \"target\": \"common\" }}"))
         .collect::<Vec<_>>()
@@ -328,10 +350,26 @@ fn create_compatibility_entries(
     force: bool,
     report: &mut InitReport,
 ) -> Result<()> {
+    create_compatibility_entries_for_skills(
+        project,
+        agent_dir,
+        DEFAULT_PRESET_SKILL_IDS,
+        force,
+        report,
+    )
+}
+
+pub(crate) fn create_compatibility_entries_for_skills(
+    project: &Path,
+    agent_dir: &Path,
+    skill_ids: &[&str],
+    force: bool,
+    report: &mut InitReport,
+) -> Result<()> {
     create_dir(project.join(".claude").join("skills"), force, report)?;
     create_dir(project.join(".cursor").join("rules"), force, report)?;
 
-    for skill_id in DEFAULT_PRESET_SKILL_IDS {
+    for skill_id in skill_ids {
         let skill_path = agent_skill_path(agent_dir, skill_id);
         let claude_link = claude_link_path(project, skill_id);
         create_symlink(&skill_path, &claude_link, force)?;
@@ -357,19 +395,32 @@ fn create_compatibility_entries(
 
 fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Path) -> Result<()> {
     let skill_path = project_relative(&agent_skill_path(agent_dir, skill_id), project);
+    let description = cursor_rule_description(skill_id);
     let content = format!(
         concat!(
             "---\n",
-            "description: Use the Codeseed preset skill {0} when maintaining Codeseed skills or project skill metadata.\n",
+            "description: {0}\n",
             "globs:\n",
             "alwaysApply: false\n",
             "---\n\n",
             "Use the Codeseed-managed skill at `{1}/SKILL.md`.\n",
-            "Follow its instructions when the task is about creating, reviewing, or improving Codeseed-managed skills.\n"
+            "Follow its instructions when this task matches the description above.\n"
         ),
-        skill_id, skill_path
+        description, skill_path
     );
     write_file(path, content.as_bytes())
+}
+
+fn cursor_rule_description(skill_id: &str) -> &'static str {
+    match skill_id {
+        "codeseed-multi-git-remote" => {
+            "Use when managing multiple Git remotes, including adding, removing, fetching, pulling, or pushing across mirrors such as GitHub and Gitee."
+        }
+        "codeseed-skill-author" => {
+            "Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata."
+        }
+        _ => "Use the matching Codeseed-managed project skill.",
+    }
 }
 
 fn agents_md_content() -> String {

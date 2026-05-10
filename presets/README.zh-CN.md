@@ -31,7 +31,7 @@ codeseed add preset:<skill-id>
 例如：
 
 ```text
-codeseed add preset:codeseed-skill-author
+codeseed add preset:codeseed-multi-git-remote
 ```
 
 ## Manifest
@@ -49,4 +49,3 @@ localized_entry_zh_cn = "SKILL.zh-CN.md"
 ```
 
 `target` 使用与 CLI 相同的目标名称：`common`、`codex`、`claude` 或 `cursor`。
-

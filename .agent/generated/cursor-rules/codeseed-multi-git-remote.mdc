@@ -1,0 +1,8 @@
+---
+description: Use when managing multiple Git remotes, including adding, removing, fetching, pulling, or pushing across mirrors such as GitHub and Gitee.
+globs:
+alwaysApply: false
+---
+
+Use the Codeseed-managed skill at `.agent/skills/common/codeseed-multi-git-remote/SKILL.md`.
+Follow its instructions when this task matches the description above.

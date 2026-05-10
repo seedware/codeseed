@@ -15,10 +15,11 @@ fn main() {
             println!("generated files: {}", report.generated_files.len());
             println!("generated links: {}", report.generated_links.len());
         }),
-        Command::Add(command) => {
-            println!("codeseed add: project={:?} {command:?}", cli.project);
-            Ok(())
-        }
+        Command::Add(command) => codeseed::add::run(&cli.project, &command).map(|report| {
+            println!("Added skill {}", report.installed_skill);
+            println!("generated files: {}", report.generated_files.len());
+            println!("generated links: {}", report.generated_links.len());
+        }),
         Command::Remove(command) => {
             println!("codeseed rm: project={:?} {command:?}", cli.project);
             Ok(())

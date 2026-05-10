@@ -32,6 +32,7 @@ For example:
 
 ```text
 codeseed add preset:codeseed-skill-author
+codeseed add preset:codeseed-multi-git-remote
 ```
 
 ## Manifest
@@ -49,4 +50,3 @@ localized_entry_zh_cn = "SKILL.zh-CN.md"
 ```
 
 `target` uses the same target names as the CLI: `common`, `codex`, `claude`, or `cursor`.
-
