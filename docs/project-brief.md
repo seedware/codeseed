@@ -70,6 +70,29 @@ Expected behavior:
 4. Place files in the correct managed directory.
 5. Record the operation in `.codeseed/`.
 
+### `codeseed list`
+
+Lists skills known to Codeseed.
+
+Expected behavior:
+
+1. List built-in preset skills by default.
+2. Support listing installed project skills.
+3. Support machine-readable output for scripts.
+4. Later extend to SkillHub-backed sources without changing the command shape.
+
+### `codeseed update`
+
+Updates the Codeseed executable itself.
+
+Expected behavior:
+
+1. Use the local install script when running from a Codeseed source checkout.
+2. Otherwise download and run the published install script.
+3. Support selecting a version.
+4. Support dry-run output so users can inspect the update plan first.
+5. Reuse the same `~/.codeseed` home directory model as installation.
+
 ### `codeseed rm <skill>`
 
 Removes a managed skill.

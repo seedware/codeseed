@@ -68,6 +68,29 @@ Codeseed 是一个命令行工具，用于管理目标项目中的 agent skills�
 4. 将文件放置到正确的受管理目录。
 5. 在 `.codeseed/` 中记录操作。
 
+### `codeseed list`
+
+列出 Codeseed 已知的 skills。
+
+预期行为：
+
+1. 默认列出内置预置 skills。
+2. 支持列出当前项目已安装的 skills。
+3. 支持便于脚本使用的机器可读输出。
+4. 未来可以扩展到 SkillHub-backed 来源，而不改变命令形态。
+
+### `codeseed update`
+
+更新 Codeseed 可执行文件本身。
+
+预期行为：
+
+1. 当命令在 Codeseed 源码仓库中运行时，使用本地安装脚本。
+2. 否则下载并运行已发布的安装脚本。
+3. 支持选择版本。
+4. 支持 dry-run 输出，让用户先检查更新计划。
+5. 复用安装时的 `~/.codeseed` 主目录模型。
+
 ### `codeseed rm <skill>`
 
 移除一个受管理的 skill。

@@ -57,6 +57,53 @@ codeseed add <SOURCE> [--hub <URL>] [--name <NAME>] [--target <TARGET>] [--targe
 3. `claude`
 4. `cursor`
 
+### `codeseed list`
+
+列出可用的内置 skills，或列出当前项目已安装的 skills。
+
+```text
+codeseed list [--installed] [--format <FORMAT>]
+```
+
+选项：
+
+1. `--installed`：列出当前项目已安装的 skills，而不是内置可用 skills。
+2. `--format <FORMAT>`：输出格式。默认是 `text`。
+
+格式：
+
+1. `text`
+2. `json`
+
+### `codeseed update`
+
+更新 `codeseed` 可执行文件本身。
+
+```text
+codeseed update [--version <VERSION>] [--home <DIR>] [--bin-dir <DIR>] [--mode <MODE>] [--script-url <URL>] [--dry-run]
+```
+
+行为：
+
+1. 如果当前项目中存在本地 `scripts/install.sh`，Codeseed 会使用它。
+2. 否则 Codeseed 会下载安装脚本，然后使用 `sh` 执行。
+3. 安装器默认安装到 `~/.codeseed/bin`。
+
+选项：
+
+1. `--version <VERSION>`：要安装的 Codeseed 版本。默认是 `latest`。
+2. `--home <DIR>`：Codeseed 主目录。安装器中默认是 `~/.codeseed`。
+3. `--bin-dir <DIR>`：可执行文件目录。安装器中默认是 `~/.codeseed/bin`。
+4. `--mode <MODE>`：安装策略。默认是 `auto`。
+5. `--script-url <URL>`：当没有本地安装器时使用的安装脚本 URL。
+6. `--dry-run`：只展示更新计划，不执行更新。
+
+模式：
+
+1. `auto`
+2. `local`
+3. `prebuilt`
+
 ### `codeseed rm <SKILL>`
 
 移除已安装的 Codeseed-managed skill。

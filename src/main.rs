@@ -1,5 +1,5 @@
 use clap::Parser;
-use codeseed::cli::{Cli, Command};
+use codeseed::cli::{Cli, Command, OutputFormat};
 
 fn main() {
     let cli = Cli::parse();
@@ -19,6 +19,20 @@ fn main() {
             println!("Added skill {}", report.installed_skill);
             println!("generated files: {}", report.generated_files.len());
             println!("generated links: {}", report.generated_links.len());
+        }),
+        Command::List(command) => codeseed::list::run(&cli.project, &command).map(|report| {
+            let output = match command.format {
+                OutputFormat::Text => codeseed::list::format_text(&report),
+                OutputFormat::Json => codeseed::list::format_json(&report),
+            };
+            print!("{output}");
+        }),
+        Command::Update(command) => codeseed::update::run(&cli.project, &command).map(|report| {
+            if report.executed {
+                println!("Updated Codeseed");
+            } else {
+                println!("Update plan: {}", report.plan);
+            }
         }),
         Command::Remove(command) => {
             println!("codeseed rm: project={:?} {command:?}", cli.project);

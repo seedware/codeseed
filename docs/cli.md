@@ -57,6 +57,53 @@ Targets:
 3. `claude`
 4. `cursor`
 
+### `codeseed list`
+
+Lists available built-in skills or installed project skills.
+
+```text
+codeseed list [--installed] [--format <FORMAT>]
+```
+
+Options:
+
+1. `--installed`: list skills installed in the current project instead of built-in available skills.
+2. `--format <FORMAT>`: output format. Defaults to `text`.
+
+Formats:
+
+1. `text`
+2. `json`
+
+### `codeseed update`
+
+Updates the `codeseed` executable itself.
+
+```text
+codeseed update [--version <VERSION>] [--home <DIR>] [--bin-dir <DIR>] [--mode <MODE>] [--script-url <URL>] [--dry-run]
+```
+
+Behavior:
+
+1. If a local `scripts/install.sh` exists, Codeseed uses it.
+2. Otherwise Codeseed downloads the install script and runs it with `sh`.
+3. The installer installs into `~/.codeseed/bin` by default.
+
+Options:
+
+1. `--version <VERSION>`: Codeseed version to install. Defaults to `latest`.
+2. `--home <DIR>`: Codeseed home directory. Defaults to `~/.codeseed` in the installer.
+3. `--bin-dir <DIR>`: directory for the executable. Defaults to `~/.codeseed/bin` in the installer.
+4. `--mode <MODE>`: installer strategy. Defaults to `auto`.
+5. `--script-url <URL>`: install script URL used when no local installer is available.
+6. `--dry-run`: show the update plan without executing it.
+
+Modes:
+
+1. `auto`
+2. `local`
+3. `prebuilt`
+
 ### `codeseed rm <SKILL>`
 
 Removes an installed Codeseed-managed skill.

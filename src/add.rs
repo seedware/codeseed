@@ -119,7 +119,7 @@ fn ensure_managed_dirs(
     Ok(())
 }
 
-fn list_common_skills(agent_dir: &Path) -> Result<Vec<String>> {
+pub(crate) fn list_common_skills(agent_dir: &Path) -> Result<Vec<String>> {
     let common_dir = agent_dir.join("skills").join("common");
     let mut skills = Vec::new();
     if !common_dir.exists() {

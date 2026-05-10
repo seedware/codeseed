@@ -26,6 +26,12 @@ pub enum Command {
     /// Add a skill from presets, SkillHub, GitHub, URL, file, or directory.
     Add(AddCommand),
 
+    /// List available or installed skills.
+    List(ListCommand),
+
+    /// Update the codeseed executable itself.
+    Update(UpdateCommand),
+
     /// Remove an installed Codeseed-managed skill.
     #[command(name = "rm", alias = "remove")]
     Remove(RemoveCommand),
@@ -88,6 +94,48 @@ pub struct AddCommand {
     /// Replace an existing managed skill with the same id or name.
     #[arg(long, short)]
     pub force: bool,
+}
+
+#[derive(Debug, Args)]
+pub struct ListCommand {
+    /// List installed project skills instead of built-in available skills.
+    #[arg(long)]
+    pub installed: bool,
+
+    /// Output format.
+    #[arg(long, value_enum, default_value = "text")]
+    pub format: OutputFormat,
+}
+
+#[derive(Debug, Args)]
+pub struct UpdateCommand {
+    /// Codeseed version to install.
+    #[arg(long, value_name = "VERSION", default_value = "latest")]
+    pub version: String,
+
+    /// Codeseed home directory. Defaults to ~/.codeseed in the installer.
+    #[arg(long, value_name = "DIR")]
+    pub home: Option<PathBuf>,
+
+    /// Directory for the codeseed executable. Defaults to ~/.codeseed/bin in the installer.
+    #[arg(long, value_name = "DIR")]
+    pub bin_dir: Option<PathBuf>,
+
+    /// Installer strategy.
+    #[arg(long, value_enum, default_value = "auto")]
+    pub mode: UpdateMode,
+
+    /// Install script URL used when no local installer is available.
+    #[arg(
+        long,
+        value_name = "URL",
+        default_value = "https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh"
+    )]
+    pub script_url: String,
+
+    /// Show the update plan without executing it.
+    #[arg(long)]
+    pub dry_run: bool,
 }
 
 #[derive(Debug, Args)]
@@ -178,11 +226,18 @@ pub enum OutputFormat {
     Json,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+pub enum UpdateMode {
+    Auto,
+    Local,
+    Prebuilt,
+}
+
 #[cfg(test)]
 mod tests {
     use clap::{CommandFactory, Parser};
 
-    use super::{Cli, Command, OutputFormat, SkillTarget};
+    use super::{Cli, Command, OutputFormat, SkillTarget, UpdateMode};
 
     #[test]
     fn clap_definition_is_valid() {
@@ -235,6 +290,79 @@ mod tests {
             ".agent/skills/codex"
         );
         assert!(command.force);
+    }
+
+    #[test]
+    fn parses_list_defaults_to_available_text() {
+        let cli = Cli::parse_from(["codeseed", "list"]);
+
+        let Command::List(command) = cli.command else {
+            panic!("expected list command");
+        };
+
+        assert!(!command.installed);
+        assert_eq!(command.format, OutputFormat::Text);
+    }
+
+    #[test]
+    fn parses_list_installed_json() {
+        let cli = Cli::parse_from(["codeseed", "list", "--installed", "--format", "json"]);
+
+        let Command::List(command) = cli.command else {
+            panic!("expected list command");
+        };
+
+        assert!(command.installed);
+        assert_eq!(command.format, OutputFormat::Json);
+    }
+
+    #[test]
+    fn parses_update_defaults() {
+        let cli = Cli::parse_from(["codeseed", "update"]);
+
+        let Command::Update(command) = cli.command else {
+            panic!("expected update command");
+        };
+
+        assert_eq!(command.version, "latest");
+        assert_eq!(command.home, None);
+        assert_eq!(command.bin_dir, None);
+        assert_eq!(command.mode, UpdateMode::Auto);
+        assert!(!command.dry_run);
+        assert!(command.script_url.contains("scripts/install.sh"));
+    }
+
+    #[test]
+    fn parses_update_overrides() {
+        let cli = Cli::parse_from([
+            "codeseed",
+            "update",
+            "--version",
+            "v0.2.0",
+            "--home",
+            "/tmp/codeseed",
+            "--bin-dir",
+            "/tmp/codeseed/bin",
+            "--mode",
+            "prebuilt",
+            "--dry-run",
+        ]);
+
+        let Command::Update(command) = cli.command else {
+            panic!("expected update command");
+        };
+
+        assert_eq!(command.version, "v0.2.0");
+        assert_eq!(
+            command.home.as_ref().unwrap().to_string_lossy(),
+            "/tmp/codeseed"
+        );
+        assert_eq!(
+            command.bin_dir.as_ref().unwrap().to_string_lossy(),
+            "/tmp/codeseed/bin"
+        );
+        assert_eq!(command.mode, UpdateMode::Prebuilt);
+        assert!(command.dry_run);
     }
 
     #[test]
