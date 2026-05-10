@@ -108,3 +108,23 @@ Options:
 3. `--prune`: remove stale generated files when they are still owned by Codeseed.
 
 `--dry-run` and `--check` are mutually exclusive.
+
+### `codeseed clear`
+
+Clears Codeseed-managed state and generated agent content from a project.
+
+```text
+codeseed clear [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--dry-run] [--yes --confirm clear-codeseed-state]
+```
+
+This is a destructive command. By default, Codeseed must ask for an interactive second confirmation before removing anything.
+
+Options:
+
+1. `--agent-dir <DIR>`: agent-facing directory to remove. Defaults to `.agent`.
+2. `--codeseed-dir <DIR>`: Codeseed metadata directory to remove. Defaults to `.codeseed`.
+3. `--dry-run`: show what would be removed without modifying files.
+4. `--yes`: skip the interactive confirmation prompt.
+5. `--confirm clear-codeseed-state`: required confirmation phrase when using `--yes`.
+
+`--yes` and `--confirm clear-codeseed-state` must be used together. They cannot be combined with `--dry-run`.

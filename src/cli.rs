@@ -35,6 +35,9 @@ pub enum Command {
 
     /// Reconcile generated files from recorded Codeseed state.
     Sync(SyncCommand),
+
+    /// Clear Codeseed-managed state and generated agent content.
+    Clear(ClearCommand),
 }
 
 #[derive(Debug, Args)]
@@ -130,6 +133,35 @@ pub struct SyncCommand {
     /// Remove stale generated files when they are still owned by Codeseed.
     #[arg(long)]
     pub prune: bool,
+}
+
+#[derive(Debug, Args)]
+pub struct ClearCommand {
+    /// Agent-facing directory to remove from the target project.
+    #[arg(long, value_name = "DIR", default_value = ".agent")]
+    pub agent_dir: PathBuf,
+
+    /// Codeseed metadata directory to remove from the target project.
+    #[arg(long, value_name = "DIR", default_value = ".codeseed")]
+    pub codeseed_dir: PathBuf,
+
+    /// Show what would be removed without modifying files.
+    #[arg(long)]
+    pub dry_run: bool,
+
+    /// Skip the interactive confirmation prompt.
+    #[arg(long, conflicts_with = "dry_run", requires = "confirm")]
+    pub yes: bool,
+
+    /// Required phrase when using --yes. Must be clear-codeseed-state.
+    #[arg(
+        long,
+        value_name = "PHRASE",
+        conflicts_with = "dry_run",
+        requires = "yes",
+        value_parser = ["clear-codeseed-state"]
+    )]
+    pub confirm: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
@@ -238,5 +270,74 @@ mod tests {
 
         assert_eq!(command.format, OutputFormat::Json);
         assert!(command.strict);
+    }
+
+    #[test]
+    fn parses_clear_defaults_to_interactive_confirmation() {
+        let cli = Cli::parse_from(["codeseed", "clear"]);
+
+        let Command::Clear(command) = cli.command else {
+            panic!("expected clear command");
+        };
+
+        assert_eq!(command.agent_dir.to_string_lossy(), ".agent");
+        assert_eq!(command.codeseed_dir.to_string_lossy(), ".codeseed");
+        assert!(!command.dry_run);
+        assert!(!command.yes);
+        assert_eq!(command.confirm, None);
+    }
+
+    #[test]
+    fn parses_clear_non_interactive_confirmation() {
+        let cli = Cli::parse_from([
+            "codeseed",
+            "clear",
+            "--yes",
+            "--confirm",
+            "clear-codeseed-state",
+        ]);
+
+        let Command::Clear(command) = cli.command else {
+            panic!("expected clear command");
+        };
+
+        assert!(command.yes);
+        assert_eq!(command.confirm.as_deref(), Some("clear-codeseed-state"));
+    }
+
+    #[test]
+    fn rejects_clear_yes_without_confirmation_phrase() {
+        let result = Cli::try_parse_from(["codeseed", "clear", "--yes"]);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn rejects_clear_confirmation_phrase_without_yes() {
+        let result =
+            Cli::try_parse_from(["codeseed", "clear", "--confirm", "clear-codeseed-state"]);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn rejects_clear_wrong_confirmation_phrase() {
+        let result = Cli::try_parse_from(["codeseed", "clear", "--yes", "--confirm", "wrong"]);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn rejects_clear_dry_run_with_yes() {
+        let result = Cli::try_parse_from([
+            "codeseed",
+            "clear",
+            "--dry-run",
+            "--yes",
+            "--confirm",
+            "clear-codeseed-state",
+        ]);
+
+        assert!(result.is_err());
     }
 }

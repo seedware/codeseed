@@ -20,5 +20,8 @@ fn main() {
         Command::Sync(command) => {
             println!("codeseed sync: project={:?} {command:?}", cli.project);
         }
+        Command::Clear(command) => {
+            println!("codeseed clear: project={:?} {command:?}", cli.project);
+        }
     }
 }

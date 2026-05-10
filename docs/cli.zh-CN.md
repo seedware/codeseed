@@ -108,3 +108,23 @@ codeseed sync [--dry-run] [--check] [--prune]
 3. `--prune`：当过期生成文件仍归 Codeseed 所有时，移除它们。
 
 `--dry-run` 和 `--check` 互斥。
+
+### `codeseed clear`
+
+从项目中清除 Codeseed 管理的状态和生成的 agent 内容。
+
+```text
+codeseed clear [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--dry-run] [--yes --confirm clear-codeseed-state]
+```
+
+这是一个破坏性命令。默认情况下，Codeseed 必须要求用户进行交互式二次确认，然后才会移除任何内容。
+
+选项：
+
+1. `--agent-dir <DIR>`：要移除的 agent-facing 目录。默认是 `.agent`。
+2. `--codeseed-dir <DIR>`：要移除的 Codeseed 元数据目录。默认是 `.codeseed`。
+3. `--dry-run`：只展示会移除什么，不修改文件。
+4. `--yes`：跳过交互式确认提示。
+5. `--confirm clear-codeseed-state`：使用 `--yes` 时必须提供的确认短语。
+
+`--yes` 和 `--confirm clear-codeseed-state` 必须一起使用，并且不能和 `--dry-run` 同时使用。

@@ -104,6 +104,19 @@ Codeseed 是一个命令行工具，用于管理目标项目中的 agent skills�
 4. 在安全时移除过期的生成文件。
 5. 保持行为确定性，让 Git 可以跟踪有意义的变化。
 
+### `codeseed clear`
+
+从目标项目中清除 Codeseed 管理的状态和生成的 agent 内容。
+
+预期行为：
+
+1. 把这个命令视为破坏性命令。
+2. 支持 `--dry-run`，让用户先检查移除计划。
+3. 默认删除文件前必须要求用户进行交互式二次确认。
+4. 非交互式执行时必须同时提供 `--yes` 和 `--confirm clear-codeseed-state`。
+5. 只移除 Codeseed 拥有的元数据和生成的 agent-facing 内容。
+6. 避免删除未记录为 Codeseed-managed 的用户文件。
+
 ## 建议目录模型
 
 ```text

@@ -106,6 +106,19 @@ Expected behavior:
 4. Remove stale generated files when safe.
 5. Keep behavior deterministic so Git can track meaningful changes.
 
+### `codeseed clear`
+
+Clears Codeseed-managed state and generated agent content from the target project.
+
+Expected behavior:
+
+1. Treat the command as destructive.
+2. Support `--dry-run` so users can inspect the removal plan first.
+3. Require an interactive second confirmation before deleting files by default.
+4. Require both `--yes` and `--confirm clear-codeseed-state` for non-interactive execution.
+5. Remove Codeseed-owned metadata and generated agent-facing content only.
+6. Avoid deleting user-owned files that are not recorded as Codeseed-managed.
+
 ## Proposed Directory Model
 
 ```text
