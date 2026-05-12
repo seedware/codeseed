@@ -3,7 +3,9 @@ use std::path::{Path, PathBuf};
 
 use crate::cli::InitCommand;
 use crate::error::{CodeseedError, Result};
-use crate::presets::{BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
+use crate::presets::{
+    embedded_preset_files, BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR,
+};
 
 const COMMON_TARGET: &str = "common";
 const AGENT_TARGETS: &[&str] = &["common", "codex", "claude", "cursor"];
@@ -279,20 +281,47 @@ pub(crate) fn install_preset_skill(agent_dir: &Path, skill_id: &str, force: bool
         ));
     }
 
-    let source = preset_skill_source(skill_id);
     let destination = agent_skill_path(agent_dir, skill_id);
 
-    copy_dir(&source, &destination, force)
+    if let Some(source) = local_preset_skill_source(skill_id) {
+        copy_dir(&source, &destination, force)
+    } else {
+        copy_embedded_preset_skill(skill_id, &destination, force)
+    }
 }
 
-fn preset_skill_source(skill_id: &str) -> PathBuf {
+fn local_preset_skill_source(skill_id: &str) -> Option<PathBuf> {
     let local_source = current_dir_or_dot().join(PRESET_SKILLS_DIR).join(skill_id);
     if local_source.is_dir() {
-        return local_source;
+        return Some(local_source);
     }
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+    let manifest_source = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join(PRESET_SKILLS_DIR)
-        .join(skill_id)
+        .join(skill_id);
+    manifest_source.is_dir().then_some(manifest_source)
+}
+
+fn copy_embedded_preset_skill(skill_id: &str, destination: &Path, force: bool) -> Result<()> {
+    if destination.exists() {
+        if force {
+            fs::remove_dir_all(destination)
+                .map_err(|source| CodeseedError::io(destination, source))?;
+        } else {
+            return Ok(());
+        }
+    }
+
+    fs::create_dir_all(destination).map_err(|source| CodeseedError::io(destination, source))?;
+
+    let files = embedded_preset_files(skill_id).ok_or_else(|| {
+        CodeseedError::conflict(skill_id, "does not have embedded preset content")
+    })?;
+    for file in files {
+        let path = destination.join(file.path);
+        write_file(&path, file.content.as_bytes())?;
+    }
+
+    Ok(())
 }
 
 fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {

@@ -5,7 +5,7 @@ use crate::add::list_common_skills;
 use crate::cli::ListCommand;
 use crate::error::{CodeseedError, Result};
 use crate::init::normalize_project;
-use crate::presets::{BUILT_IN_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
+use crate::presets::{embedded_preset_manifest, BUILT_IN_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
 
 const DEFAULT_AGENT_DIR: &str = ".agent";
 
@@ -95,8 +95,14 @@ pub fn format_json(report: &ListReport) -> String {
 }
 
 fn read_preset_skill(skill_id: &str, installed: bool) -> Result<SkillSummary> {
-    let source = preset_skill_source(skill_id);
-    let manifest = read_manifest(&source.join("skill.toml"))?;
+    let manifest = if let Some(source) = preset_skill_source(skill_id) {
+        read_manifest(&source.join("skill.toml"))?
+    } else {
+        let content = embedded_preset_manifest(skill_id).ok_or_else(|| {
+            CodeseedError::conflict(skill_id, "does not have embedded preset content")
+        })?;
+        parse_manifest(content)
+    };
     Ok(SkillSummary {
         id: manifest.id,
         name: manifest.name,
@@ -124,17 +130,18 @@ fn read_installed_skill(project: &Path, skill_id: &str) -> Result<SkillSummary> 
     })
 }
 
-fn preset_skill_source(skill_id: &str) -> PathBuf {
+fn preset_skill_source(skill_id: &str) -> Option<PathBuf> {
     let local_source = std::env::current_dir()
         .unwrap_or_else(|_| PathBuf::from("."))
         .join(PRESET_SKILLS_DIR)
         .join(skill_id);
     if local_source.is_dir() {
-        return local_source;
+        return Some(local_source);
     }
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+    let manifest_source = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join(PRESET_SKILLS_DIR)
-        .join(skill_id)
+        .join(skill_id);
+    manifest_source.is_dir().then_some(manifest_source)
 }
 
 #[derive(Debug)]
@@ -147,12 +154,16 @@ struct SkillManifest {
 
 fn read_manifest(path: &Path) -> Result<SkillManifest> {
     let content = fs::read_to_string(path).map_err(|source| CodeseedError::io(path, source))?;
-    Ok(SkillManifest {
-        id: manifest_value(&content, "id").unwrap_or_else(|| "unknown".to_string()),
-        name: manifest_value(&content, "name").unwrap_or_else(|| "Unknown".to_string()),
-        version: manifest_value(&content, "version").unwrap_or_else(|| "unknown".to_string()),
-        target: manifest_value(&content, "target").unwrap_or_else(|| "common".to_string()),
-    })
+    Ok(parse_manifest(&content))
+}
+
+fn parse_manifest(content: &str) -> SkillManifest {
+    SkillManifest {
+        id: manifest_value(content, "id").unwrap_or_else(|| "unknown".to_string()),
+        name: manifest_value(content, "name").unwrap_or_else(|| "Unknown".to_string()),
+        version: manifest_value(content, "version").unwrap_or_else(|| "unknown".to_string()),
+        target: manifest_value(content, "target").unwrap_or_else(|| "common".to_string()),
+    }
 }
 
 fn manifest_value(content: &str, key: &str) -> Option<String> {
