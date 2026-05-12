@@ -217,8 +217,15 @@ mod tests {
 
         let report = run(&project, &command).expect("list should succeed");
 
-        assert_eq!(report.skills.len(), 1);
-        assert_eq!(report.skills[0].id, "codeseed-skill-author");
+        assert_eq!(report.skills.len(), 2);
+        assert!(report
+            .skills
+            .iter()
+            .any(|skill| skill.id == "codeseed-skill-author"));
+        assert!(report
+            .skills
+            .iter()
+            .any(|skill| skill.id == "codeseed-context-index"));
 
         std::fs::remove_dir_all(project).ok();
     }

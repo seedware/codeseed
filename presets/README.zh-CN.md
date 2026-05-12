@@ -31,6 +31,8 @@ codeseed add preset:<skill-id>
 例如：
 
 ```text
+codeseed add preset:codeseed-skill-author
+codeseed add preset:codeseed-context-index
 codeseed add preset:codeseed-multi-git-remote
 ```
 

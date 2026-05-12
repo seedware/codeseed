@@ -4,6 +4,7 @@ This repository is managed by Codeseed for project-local agent skills.
 
 ## Skills
 
+- Read `docs/context/README.md` first when starting a new thread or when project background is unclear.
 - Canonical skills live under `.agent/skills/`.
 - Codeseed metadata lives under `.codeseed/`.
 - Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.

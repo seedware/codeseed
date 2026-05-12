@@ -1,8 +1,11 @@
 pub const PRESET_SKILLS_DIR: &str = "presets/skills";
 pub const PRESET_SOURCE_PREFIX: &str = "preset:";
-pub const DEFAULT_PRESET_SKILL_IDS: &[&str] = &["codeseed-skill-author"];
-pub const BUILT_IN_PRESET_SKILL_IDS: &[&str] =
-    &["codeseed-skill-author", "codeseed-multi-git-remote"];
+pub const DEFAULT_PRESET_SKILL_IDS: &[&str] = &["codeseed-skill-author", "codeseed-context-index"];
+pub const BUILT_IN_PRESET_SKILL_IDS: &[&str] = &[
+    "codeseed-skill-author",
+    "codeseed-context-index",
+    "codeseed-multi-git-remote",
+];
 
 #[cfg(test)]
 mod tests {
@@ -13,14 +16,21 @@ mod tests {
 
     #[test]
     fn default_preset_ids_are_explicit() {
-        assert_eq!(DEFAULT_PRESET_SKILL_IDS, ["codeseed-skill-author"]);
+        assert_eq!(
+            DEFAULT_PRESET_SKILL_IDS,
+            ["codeseed-skill-author", "codeseed-context-index"]
+        );
     }
 
     #[test]
     fn built_in_preset_ids_are_explicit() {
         assert_eq!(
             BUILT_IN_PRESET_SKILL_IDS,
-            ["codeseed-skill-author", "codeseed-multi-git-remote"]
+            [
+                "codeseed-skill-author",
+                "codeseed-context-index",
+                "codeseed-multi-git-remote"
+            ]
         );
     }
 

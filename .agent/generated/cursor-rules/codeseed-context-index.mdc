@@ -1,0 +1,8 @@
+---
+description: Use when maintaining docs/context as a compact project context index for AI-assisted development.
+globs:
+alwaysApply: false
+---
+
+Use the Codeseed-managed skill at `.agent/skills/common/codeseed-context-index/SKILL.md`.
+Follow its instructions when this task matches the description above.

@@ -38,16 +38,18 @@ pub fn run(project: &Path, command: &InitCommand) -> Result<InitReport> {
         command.force,
         &mut report,
     )?;
+    create_context_index(&project, &mut report)?;
 
     if !command.no_presets {
         install_default_presets(&agent_dir, command.force, &mut report)?;
     }
 
+    let installed_skills = list_common_skills(&agent_dir)?;
     write_state_file(
         &codeseed_dir,
         &command.agent_dir,
         &command.codeseed_dir,
-        &report.installed_skills,
+        &installed_skills,
     )?;
 
     if !command.no_links {
@@ -229,6 +231,14 @@ fn codeseed_state_path(codeseed_dir: &Path) -> PathBuf {
     codeseed_dir.join("state.json")
 }
 
+fn context_readme_path(project: &Path) -> PathBuf {
+    project.join("docs").join("context").join("README.md")
+}
+
+fn context_readme_zh_path(project: &Path) -> PathBuf {
+    project.join("docs").join("context").join("README.zh-CN.md")
+}
+
 pub(crate) fn create_dir(
     path: impl AsRef<Path>,
     force: bool,
@@ -311,6 +321,24 @@ fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn list_common_skills(agent_dir: &Path) -> Result<Vec<String>> {
+    let common_dir = agent_dir.join("skills").join(COMMON_TARGET);
+    let mut skills = Vec::new();
+    if !common_dir.exists() {
+        return Ok(skills);
+    }
+
+    for entry in fs::read_dir(&common_dir).map_err(|error| CodeseedError::io(&common_dir, error))? {
+        let entry = entry.map_err(|error| CodeseedError::io(&common_dir, error))?;
+        let path = entry.path();
+        if path.is_dir() {
+            skills.push(entry.file_name().to_string_lossy().to_string());
+        }
+    }
+    skills.sort();
+    Ok(skills)
 }
 
 pub(crate) fn write_state_file(
@@ -419,6 +447,9 @@ fn cursor_rule_description(skill_id: &str) -> &'static str {
         "codeseed-skill-author" => {
             "Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata."
         }
+        "codeseed-context-index" => {
+            "Use when maintaining docs/context as a compact project context index for AI-assisted development."
+        }
         _ => "Use the matching Codeseed-managed project skill.",
     }
 }
@@ -428,6 +459,7 @@ fn agents_md_content() -> String {
         "# Codeseed Agent Instructions\n\n",
         "This repository is managed by Codeseed for project-local agent skills.\n\n",
         "## Skills\n\n",
+        "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
         "- Canonical skills live under `.agent/skills/`.\n",
         "- Codeseed metadata lives under `.codeseed/`.\n",
         "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n",
@@ -442,6 +474,65 @@ fn agents_md_content() -> String {
 fn write_file(path: &Path, content: &[u8]) -> Result<()> {
     ensure_parent(path)?;
     fs::write(path, content).map_err(|source| CodeseedError::io(path, source))
+}
+
+fn write_file_if_missing(path: &Path, content: &[u8], report: &mut InitReport) -> Result<()> {
+    if path.exists() {
+        return Ok(());
+    }
+    write_file(path, content)?;
+    push_generated_file(report, path);
+    Ok(())
+}
+
+fn create_context_index(project: &Path, report: &mut InitReport) -> Result<()> {
+    create_dir(project.join("docs").join("context"), false, report)?;
+    write_file_if_missing(
+        &context_readme_path(project),
+        context_index_content().as_bytes(),
+        report,
+    )?;
+    write_file_if_missing(
+        &context_readme_zh_path(project),
+        context_index_zh_content().as_bytes(),
+        report,
+    )
+}
+
+fn context_index_content() -> String {
+    concat!(
+        "# Project Context Index\n\n",
+        "Read this directory first when starting a new model thread in this project.\n\n",
+        "Keep this file short. It is an index, not a full knowledge base.\n\n",
+        "## Reading Order\n\n",
+        "1. `AGENTS.md` for repository-level agent instructions, when present.\n",
+        "2. `docs/project-brief.md` for product direction.\n",
+        "3. `docs/skill-layout.md` for Codeseed-managed skill layout, when relevant.\n",
+        "4. Other focused docs only when the task needs them.\n\n",
+        "## Maintenance\n\n",
+        "- Add links here when durable project context is created elsewhere.\n",
+        "- Prefer focused documents over long all-in-one context files.\n",
+        "- Remove stale links quickly.\n"
+    )
+    .to_string()
+}
+
+fn context_index_zh_content() -> String {
+    concat!(
+        "# 项目上下文索引\n\n",
+        "在这个项目中开启新的模型 thread 时，先阅读这个目录。\n\n",
+        "保持本文件简短。它是索引，不是完整知识库。\n\n",
+        "## 阅读顺序\n\n",
+        "1. 如果存在 `AGENTS.md`，先阅读仓库级 agent 指令。\n",
+        "2. 阅读 `docs/project-brief.zh-CN.md` 了解产品方向。\n",
+        "3. 相关时阅读 `docs/skill-layout.zh-CN.md` 了解 Codeseed 管理的 skill 目录结构。\n",
+        "4. 只在任务需要时继续阅读其它聚焦文档。\n\n",
+        "## 维护规则\n\n",
+        "- 当其它位置产生长期项目上下文时，在这里增加链接。\n",
+        "- 优先使用聚焦文档，避免维护超长的单文件上下文。\n",
+        "- 及时移除过期链接。\n"
+    )
+    .to_string()
 }
 
 fn create_symlink(target: &Path, link: &Path, force: bool) -> Result<()> {
@@ -515,11 +606,16 @@ mod tests {
         let report = run(&project, &command).expect("init should succeed");
 
         assert!(project.join(".agent/skills/common").is_dir());
+        assert!(project.join("docs/context/README.md").is_file());
+        assert!(project.join("docs/context/README.zh-CN.md").is_file());
         assert!(project.join(".agent/skills/codex").is_dir());
         assert!(project.join(".agent/skills/claude").is_dir());
         assert!(project.join(".agent/skills/cursor").is_dir());
         assert!(project
             .join(".agent/skills/common/codeseed-skill-author/SKILL.md")
+            .is_file());
+        assert!(project
+            .join(".agent/skills/common/codeseed-context-index/SKILL.md")
             .is_file());
         assert!(project.join(".codeseed/state.json").is_file());
         assert!(project
@@ -543,7 +639,10 @@ mod tests {
         assert!(project.join("AGENTS.md").is_file());
         assert_eq!(
             report.installed_skills,
-            vec!["codeseed-skill-author".to_string()]
+            vec![
+                "codeseed-skill-author".to_string(),
+                "codeseed-context-index".to_string()
+            ]
         );
 
         std::fs::remove_dir_all(project).ok();

@@ -1,8 +1,8 @@
 ---
-description: Use the Codeseed preset skill codeseed-skill-author when maintaining Codeseed skills or project skill metadata.
+description: Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata.
 globs:
 alwaysApply: false
 ---
 
 Use the Codeseed-managed skill at `.agent/skills/common/codeseed-skill-author/SKILL.md`.
-Follow its instructions when the task is about creating, reviewing, or improving Codeseed-managed skills.
+Follow its instructions when this task matches the description above.
