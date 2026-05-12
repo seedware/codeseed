@@ -5,6 +5,7 @@ pub const BUILT_IN_PRESET_SKILL_IDS: &[&str] = &[
     "codeseed-skill-author",
     "codeseed-context-index",
     "codeseed-multi-git-remote",
+    "codeseed-prebuilt-release",
 ];
 
 #[cfg(test)]
@@ -29,7 +30,8 @@ mod tests {
             [
                 "codeseed-skill-author",
                 "codeseed-context-index",
-                "codeseed-multi-git-remote"
+                "codeseed-multi-git-remote",
+                "codeseed-prebuilt-release"
             ]
         );
     }

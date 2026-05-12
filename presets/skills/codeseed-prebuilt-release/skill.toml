@@ -1,0 +1,11 @@
+schema = 1
+id = "codeseed-prebuilt-release"
+name = "Codeseed Prebuilt Release"
+version = "0.1.0"
+target = "common"
+entry = "SKILL.md"
+localized_entry_zh_cn = "SKILL.zh-CN.md"
+
+[source]
+type = "preset"
+package = "codeseed"

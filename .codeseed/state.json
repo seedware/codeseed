@@ -5,6 +5,7 @@
   "installedSkills": [
     { "id": "codeseed-context-index", "source": "preset:codeseed-context-index", "target": "common" },
     { "id": "codeseed-multi-git-remote", "source": "preset:codeseed-multi-git-remote", "target": "common" },
+    { "id": "codeseed-prebuilt-release", "source": "preset:codeseed-prebuilt-release", "target": "common" },
     { "id": "codeseed-skill-author", "source": "preset:codeseed-skill-author", "target": "common" }
   ]
 }

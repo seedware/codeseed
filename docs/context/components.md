@@ -30,6 +30,7 @@ Current preset skills:
 1. `codeseed-skill-author`
 2. `codeseed-context-index`
 3. `codeseed-multi-git-remote`
+4. `codeseed-prebuilt-release`
 
 ## Generated Compatibility
 
@@ -40,4 +41,3 @@ Compatibility generation currently lives in `src/init.rs`:
 3. generic agent guidance: `AGENTS.md`.
 
 Prefer reusing these helpers before adding separate generation code.
-

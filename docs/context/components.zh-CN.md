@@ -30,6 +30,7 @@ Preset 内容位于 `presets/skills/<skill-id>/`。
 1. `codeseed-skill-author`
 2. `codeseed-context-index`
 3. `codeseed-multi-git-remote`
+4. `codeseed-prebuilt-release`
 
 ## 生成的兼容入口
 
@@ -40,4 +41,3 @@ Preset 内容位于 `presets/skills/<skill-id>/`。
 3. 通用 agent 指令：`AGENTS.md`。
 
 新增生成逻辑前，优先复用这些 helper。
-

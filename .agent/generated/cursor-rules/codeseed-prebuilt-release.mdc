@@ -1,0 +1,8 @@
+---
+description: Use when publishing Codeseed prebuilt release archives consumed by scripts/install.sh, starting with the current host platform.
+globs:
+alwaysApply: false
+---
+
+Use the Codeseed-managed skill at `.agent/skills/common/codeseed-prebuilt-release/SKILL.md`.
+Follow its instructions when this task matches the description above.

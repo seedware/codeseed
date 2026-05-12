@@ -450,6 +450,9 @@ fn cursor_rule_description(skill_id: &str) -> &'static str {
         "codeseed-context-index" => {
             "Use when maintaining docs/context as a compact project context index for AI-assisted development."
         }
+        "codeseed-prebuilt-release" => {
+            "Use when publishing Codeseed prebuilt release archives consumed by scripts/install.sh, starting with the current host platform."
+        }
         _ => "Use the matching Codeseed-managed project skill.",
     }
 }
