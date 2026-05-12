@@ -38,9 +38,10 @@ Tool-native directories are generated compatibility entries. `.agent/skills/comm
 `.codeseed/state.json` currently records:
 
 1. schema version;
-2. agent directory;
-3. Codeseed metadata directory;
-4. installed skill ids, sources, and targets.
+2. selected instruction language;
+3. agent directory;
+4. Codeseed metadata directory;
+5. installed skill ids, sources, and targets.
 
 Keep this file deterministic and reviewable. It is intended to be committed.
 
@@ -53,4 +54,3 @@ Installation uses [scripts/install.sh](../../scripts/install.sh). It installs in
 1. use local `scripts/install.sh` when available;
 2. otherwise download the published script;
 3. support `--dry-run` so users can inspect the plan.
-

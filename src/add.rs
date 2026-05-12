@@ -8,6 +8,7 @@ use crate::init::{
     write_state_file, InitReport,
 };
 use crate::presets::PRESET_SOURCE_PREFIX;
+use crate::state::read_language_or_default;
 
 const DEFAULT_AGENT_DIR: &str = ".agent";
 const DEFAULT_CODESEED_DIR: &str = ".codeseed";
@@ -26,15 +27,17 @@ pub fn run(project: &Path, command: &AddCommand) -> Result<AddReport> {
     let project = normalize_project(project);
     let agent_dir = project.join(DEFAULT_AGENT_DIR);
     let codeseed_dir = project.join(DEFAULT_CODESEED_DIR);
+    let language = read_language_or_default(&codeseed_dir);
 
     let mut init_report = InitReport::default();
     ensure_managed_dirs(&agent_dir, &codeseed_dir, command.force, &mut init_report)?;
-    install_preset_skill(&agent_dir, &skill_id, command.force)?;
+    install_preset_skill(&agent_dir, &skill_id, command.force, language)?;
     create_compatibility_entries_for_skills(
         &project,
         &agent_dir,
         &[skill_id.as_str()],
         command.force,
+        language,
         &mut init_report,
     )?;
 
@@ -44,6 +47,7 @@ pub fn run(project: &Path, command: &AddCommand) -> Result<AddReport> {
         Path::new(DEFAULT_AGENT_DIR),
         Path::new(DEFAULT_CODESEED_DIR),
         &installed_skills,
+        language,
     )?;
 
     Ok(AddReport {

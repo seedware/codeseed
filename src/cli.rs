@@ -64,6 +64,10 @@ pub struct InitCommand {
     #[arg(long)]
     pub no_links: bool,
 
+    /// Language for generated instructions and installed preset skill documents.
+    #[arg(long, value_enum, default_value = "en")]
+    pub language: InitLanguage,
+
     /// Overwrite incompatible generated Codeseed state when possible.
     #[arg(long, short)]
     pub force: bool,
@@ -213,6 +217,23 @@ pub struct ClearCommand {
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+pub enum InitLanguage {
+    #[value(name = "en")]
+    En,
+    #[value(name = "zh-CN", alias = "zh-cn", alias = "zh")]
+    ZhCn,
+}
+
+impl InitLanguage {
+    pub fn as_state_value(self) -> &'static str {
+        match self {
+            Self::En => "en",
+            Self::ZhCn => "zh-CN",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
 pub enum SkillTarget {
     Common,
     Codex,
@@ -237,7 +258,7 @@ pub enum UpdateMode {
 mod tests {
     use clap::{CommandFactory, Parser};
 
-    use super::{Cli, Command, OutputFormat, SkillTarget, UpdateMode};
+    use super::{Cli, Command, InitLanguage, OutputFormat, SkillTarget, UpdateMode};
 
     #[test]
     fn clap_definition_is_valid() {
@@ -257,7 +278,19 @@ mod tests {
         assert_eq!(command.codeseed_dir.to_string_lossy(), ".codeseed");
         assert!(!command.no_presets);
         assert!(!command.no_links);
+        assert_eq!(command.language, InitLanguage::En);
         assert!(!command.force);
+    }
+
+    #[test]
+    fn parses_init_language() {
+        let cli = Cli::parse_from(["codeseed", "init", "--language", "zh-CN"]);
+
+        let Command::Init(command) = cli.command else {
+            panic!("expected init command");
+        };
+
+        assert_eq!(command.language, InitLanguage::ZhCn);
     }
 
     #[test]

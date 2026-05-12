@@ -21,7 +21,7 @@ Options:
 Initializes Codeseed in a project.
 
 ```text
-codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-links] [--force]
+codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-links] [--language <LANGUAGE>] [--force]
 ```
 
 Options:
@@ -30,7 +30,15 @@ Options:
 2. `--codeseed-dir <DIR>`: Codeseed metadata directory. Defaults to `.codeseed`.
 3. `--no-presets`: skip bundled preset skills.
 4. `--no-links`: skip compatibility links for known agents.
-5. `--force`, `-f`: overwrite incompatible generated Codeseed state when possible.
+5. `--language <LANGUAGE>`: language for generated instructions and installed preset skill documents. Defaults to `en`.
+6. `--force`, `-f`: overwrite incompatible generated Codeseed state when possible.
+
+Languages:
+
+1. `en`
+2. `zh-CN`
+
+Codeseed installs only one instruction language into generated project files. For Chinese preset skills, the Chinese document becomes the installed `SKILL.md` entry instead of installing both English and Chinese entry documents.
 
 ### `codeseed add <SOURCE>`
 

@@ -12,7 +12,10 @@ Rust 源码位于 `src/`。
 6. `src/list.rs`：列出内置 preset skills 或项目已安装 skills。
 7. `src/update.rs`：通过安装脚本更新 Codeseed 可执行文件。
 8. `src/presets.rs`：preset skill id 和 preset source prefix 常量。
-9. `src/lib.rs`：模块导出。
+9. `src/remove.rs`：移除已安装的 Codeseed-managed skills 及其生成的兼容入口。
+10. `src/clear.rs`：在 dry-run 或确认后清除 Codeseed-managed 项目状态。
+11. `src/state.rs`：读取持久 state 字段的小型 helper，不负责完整 state 序列化。
+12. `src/lib.rs`：模块导出。
 
 ## 命令实现模式
 
@@ -26,5 +29,4 @@ Rust 源码位于 `src/`。
 
 ## 当前缺口
 
-`rm`、`doctor`、`sync` 和 `clear` 已有命令面，但尚未完整实现。
-
+`doctor` 和 `sync` 已有命令面，但尚未完整实现。

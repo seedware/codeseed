@@ -21,7 +21,7 @@ codeseed --project <DIR> <COMMAND>
 在项目中初始化 Codeseed。
 
 ```text
-codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-links] [--force]
+codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-links] [--language <LANGUAGE>] [--force]
 ```
 
 选项：
@@ -30,7 +30,15 @@ codeseed init [--agent-dir <DIR>] [--codeseed-dir <DIR>] [--no-presets] [--no-li
 2. `--codeseed-dir <DIR>`：Codeseed 元数据目录。默认是 `.codeseed`。
 3. `--no-presets`：跳过内置预置 skills。
 4. `--no-links`：跳过已知 agent 的兼容软链接。
-5. `--force`、`-f`：在可行时覆盖不兼容的 Codeseed 生成状态。
+5. `--language <LANGUAGE>`：生成说明和安装内置 preset skill 文档时使用的语言。默认是 `en`。
+6. `--force`、`-f`：在可行时覆盖不兼容的 Codeseed 生成状态。
+
+语言：
+
+1. `en`
+2. `zh-CN`
+
+Codeseed 只会把一种说明语言安装到项目生成文件中。选择中文时，preset skill 的中文文档会作为安装后的入口 `SKILL.md`，而不是同时安装中英文两份入口说明。
 
 ### `codeseed add <SOURCE>`
 

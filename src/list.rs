@@ -207,6 +207,7 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: true,
+            language: crate::cli::InitLanguage::En,
             force: false,
         };
         let _: InitReport = init_run(&project, &init).expect("init should succeed");

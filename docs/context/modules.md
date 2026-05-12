@@ -12,7 +12,10 @@ Rust source lives under `src/`.
 6. `src/list.rs`: lists built-in preset skills or installed project skills.
 7. `src/update.rs`: updates the Codeseed executable by running the install script.
 8. `src/presets.rs`: constants for preset skill ids and preset source prefix.
-9. `src/lib.rs`: module exports.
+9. `src/remove.rs`: removes installed Codeseed-managed skills and their generated compatibility entries.
+10. `src/clear.rs`: clears Codeseed-managed project state after dry-run or confirmation.
+11. `src/state.rs`: small helpers for reading durable state fields without owning full state serialization.
+12. `src/lib.rs`: module exports.
 
 ## Command Implementation Pattern
 
@@ -26,5 +29,4 @@ For new commands:
 
 ## Current Gaps
 
-The command surface exists for `rm`, `doctor`, `sync`, and `clear`, but they are not fully implemented yet.
-
+The command surface exists for `doctor` and `sync`, but they are not fully implemented yet.

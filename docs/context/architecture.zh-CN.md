@@ -38,9 +38,10 @@ docs/context/
 `.codeseed/state.json` 当前记录：
 
 1. schema version；
-2. agent 目录；
-3. Codeseed 元数据目录；
-4. 已安装 skill 的 id、source 和 target。
+2. 选定的说明语言；
+3. agent 目录；
+4. Codeseed 元数据目录；
+5. 已安装 skill 的 id、source 和 target。
 
 保持该文件确定、可审查。它预期被提交到 Git。
 
@@ -53,4 +54,3 @@ docs/context/
 1. 本地存在 `scripts/install.sh` 时使用本地脚本；
 2. 否则下载已发布脚本；
 3. 支持 `--dry-run`，让用户先检查执行计划。
-

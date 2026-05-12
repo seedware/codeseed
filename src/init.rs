@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::cli::InitCommand;
+use crate::cli::{InitCommand, InitLanguage};
 use crate::error::{CodeseedError, Result};
 use crate::presets::{BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
 
@@ -38,10 +38,10 @@ pub fn run(project: &Path, command: &InitCommand) -> Result<InitReport> {
         command.force,
         &mut report,
     )?;
-    create_context_index(&project, &mut report)?;
+    create_context_index(&project, command.language, &mut report)?;
 
     if !command.no_presets {
-        install_default_presets(&agent_dir, command.force, &mut report)?;
+        install_default_presets(&agent_dir, command.force, command.language, &mut report)?;
     }
 
     let installed_skills = list_common_skills(&agent_dir)?;
@@ -50,10 +50,17 @@ pub fn run(project: &Path, command: &InitCommand) -> Result<InitReport> {
         &command.agent_dir,
         &command.codeseed_dir,
         &installed_skills,
+        command.language,
     )?;
 
     if !command.no_links {
-        create_compatibility_entries(&project, &agent_dir, command.force, &mut report)?;
+        create_compatibility_entries(
+            &project,
+            &agent_dir,
+            command.force,
+            command.language,
+            &mut report,
+        )?;
     }
 
     Ok(report)
@@ -235,10 +242,6 @@ fn context_readme_path(project: &Path) -> PathBuf {
     project.join("docs").join("context").join("README.md")
 }
 
-fn context_readme_zh_path(project: &Path) -> PathBuf {
-    project.join("docs").join("context").join("README.zh-CN.md")
-}
-
 pub(crate) fn create_dir(
     path: impl AsRef<Path>,
     force: bool,
@@ -263,15 +266,25 @@ pub(crate) fn create_dir(
     Ok(())
 }
 
-fn install_default_presets(agent_dir: &Path, force: bool, report: &mut InitReport) -> Result<()> {
+fn install_default_presets(
+    agent_dir: &Path,
+    force: bool,
+    language: InitLanguage,
+    report: &mut InitReport,
+) -> Result<()> {
     for skill_id in DEFAULT_PRESET_SKILL_IDS {
-        install_preset_skill(agent_dir, skill_id, force)?;
+        install_preset_skill(agent_dir, skill_id, force, language)?;
         report.installed_skills.push((*skill_id).to_string());
     }
     Ok(())
 }
 
-pub(crate) fn install_preset_skill(agent_dir: &Path, skill_id: &str, force: bool) -> Result<()> {
+pub(crate) fn install_preset_skill(
+    agent_dir: &Path,
+    skill_id: &str,
+    force: bool,
+    language: InitLanguage,
+) -> Result<()> {
     if !BUILT_IN_PRESET_SKILL_IDS.contains(&skill_id) {
         return Err(CodeseedError::conflict(
             skill_id,
@@ -282,7 +295,7 @@ pub(crate) fn install_preset_skill(agent_dir: &Path, skill_id: &str, force: bool
     let source = preset_skill_source(skill_id);
     let destination = agent_skill_path(agent_dir, skill_id);
 
-    copy_dir(&source, &destination, force)
+    copy_dir(&source, &destination, force, language)
 }
 
 fn preset_skill_source(skill_id: &str) -> PathBuf {
@@ -295,7 +308,7 @@ fn preset_skill_source(skill_id: &str) -> PathBuf {
         .join(skill_id)
 }
 
-fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
+fn copy_dir(source: &Path, destination: &Path, force: bool, language: InitLanguage) -> Result<()> {
     if destination.exists() {
         if force {
             fs::remove_dir_all(destination)
@@ -310,10 +323,17 @@ fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
     for entry in fs::read_dir(source).map_err(|error| CodeseedError::io(source, error))? {
         let entry = entry.map_err(|error| CodeseedError::io(source, error))?;
         let source_path = entry.path();
-        let destination_path = destination.join(entry.file_name());
+        let Some(destination_file_name) = localized_destination_file_name(&source_path, language)
+        else {
+            continue;
+        };
+        let destination_path = destination.join(destination_file_name);
 
         if source_path.is_dir() {
-            copy_dir(&source_path, &destination_path, force)?;
+            copy_dir(&source_path, &destination_path, force, language)?;
+        } else if source_path.file_name().and_then(|name| name.to_str()) == Some("skill.toml") {
+            let content = localized_manifest_content(&source_path, language)?;
+            write_file(&destination_path, content.as_bytes())?;
         } else {
             fs::copy(&source_path, &destination_path)
                 .map_err(|source| CodeseedError::io(&destination_path, source))?;
@@ -321,6 +341,39 @@ fn copy_dir(source: &Path, destination: &Path, force: bool) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn localized_destination_file_name(
+    source_path: &Path,
+    language: InitLanguage,
+) -> Option<std::ffi::OsString> {
+    let file_name = source_path.file_name()?;
+    let file_name_str = file_name.to_string_lossy();
+    if file_name_str.ends_with(".zh-CN.md") {
+        return match language {
+            InitLanguage::En => None,
+            InitLanguage::ZhCn => Some(std::ffi::OsString::from(
+                file_name_str.trim_end_matches(".zh-CN.md").to_string() + ".md",
+            )),
+        };
+    }
+    if language == InitLanguage::ZhCn {
+        let localized_name = file_name_str.trim_end_matches(".md").to_string() + ".zh-CN.md";
+        if file_name_str.ends_with(".md") && source_path.with_file_name(localized_name).is_file() {
+            return None;
+        }
+    }
+    Some(file_name.to_os_string())
+}
+
+fn localized_manifest_content(path: &Path, _language: InitLanguage) -> Result<String> {
+    let content = fs::read_to_string(path).map_err(|source| CodeseedError::io(path, source))?;
+    let content = content
+        .lines()
+        .filter(|line| !line.trim_start().starts_with("localized_entry_"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    Ok(format!("{content}\n"))
 }
 
 fn list_common_skills(agent_dir: &Path) -> Result<Vec<String>> {
@@ -346,6 +399,7 @@ pub(crate) fn write_state_file(
     agent_dir: &Path,
     codeseed_dir_arg: &Path,
     skill_ids: &[String],
+    language: InitLanguage,
 ) -> Result<()> {
     let path = codeseed_state_path(codeseed_dir);
     let skills = skill_ids
@@ -357,6 +411,7 @@ pub(crate) fn write_state_file(
         concat!(
             "{{\n",
             "  \"schema\": 1,\n",
+            "  \"language\": \"{}\",\n",
             "  \"agentDir\": \"{}\",\n",
             "  \"codeseedDir\": \"{}\",\n",
             "  \"installedSkills\": [\n",
@@ -364,6 +419,7 @@ pub(crate) fn write_state_file(
             "  ]\n",
             "}}\n"
         ),
+        language.as_state_value(),
         state_path(agent_dir),
         state_path(codeseed_dir_arg),
         skills
@@ -376,6 +432,7 @@ fn create_compatibility_entries(
     project: &Path,
     agent_dir: &Path,
     force: bool,
+    language: InitLanguage,
     report: &mut InitReport,
 ) -> Result<()> {
     create_compatibility_entries_for_skills(
@@ -383,6 +440,7 @@ fn create_compatibility_entries(
         agent_dir,
         DEFAULT_PRESET_SKILL_IDS,
         force,
+        language,
         report,
     )
 }
@@ -392,6 +450,7 @@ pub(crate) fn create_compatibility_entries_for_skills(
     agent_dir: &Path,
     skill_ids: &[&str],
     force: bool,
+    language: InitLanguage,
     report: &mut InitReport,
 ) -> Result<()> {
     create_dir(project.join(".claude").join("skills"), force, report)?;
@@ -414,7 +473,7 @@ pub(crate) fn create_compatibility_entries_for_skills(
 
     let agents_md = agents_md_path(project);
     if !agents_md.exists() {
-        write_file(&agents_md, agents_md_content().as_bytes())?;
+        write_file(&agents_md, agents_md_content(language).as_bytes())?;
         push_generated_file(report, &agents_md);
     }
 
@@ -457,21 +516,35 @@ fn cursor_rule_description(skill_id: &str) -> &'static str {
     }
 }
 
-fn agents_md_content() -> String {
-    concat!(
-        "# Codeseed Agent Instructions\n\n",
-        "This repository is managed by Codeseed for project-local agent skills.\n\n",
-        "## Skills\n\n",
-        "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
-        "- Canonical skills live under `.agent/skills/`.\n",
-        "- Codeseed metadata lives under `.codeseed/`.\n",
-        "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n",
-        "- Every user-facing Markdown skill document should have a Chinese version when practical.\n\n",
-        "## Verification\n\n",
-        "- Run `cargo fmt --check` after Rust edits.\n",
-        "- Run `cargo test` after CLI or skill-management changes.\n"
-    )
-    .to_string()
+pub(crate) fn agents_md_content(language: InitLanguage) -> String {
+    match language {
+        InitLanguage::En => concat!(
+            "# Codeseed Agent Instructions\n\n",
+            "This repository is managed by Codeseed for project-local agent skills.\n\n",
+            "## Skills\n\n",
+            "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
+            "- Canonical skills live under `.agent/skills/`.\n",
+            "- Codeseed metadata lives under `.codeseed/`.\n",
+            "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n\n",
+            "## Verification\n\n",
+            "- Run `cargo fmt --check` after Rust edits.\n",
+            "- Run `cargo test` after CLI or skill-management changes.\n"
+        )
+        .to_string(),
+        InitLanguage::ZhCn => concat!(
+            "# Codeseed Agent Instructions\n\n",
+            "This repository is managed by Codeseed for project-local agent skills.\n\n",
+            "## Skills\n\n",
+            "- 开启新 thread 或项目背景不清楚时，先阅读 `docs/context/README.md`。\n",
+            "- Canonical skills live under `.agent/skills/`.\n",
+            "- Codeseed metadata lives under `.codeseed/`.\n",
+            "- 修改 skill 文件前，先检查对应的 `skill.toml` 和 `SKILL.md`。\n\n",
+            "## Verification\n\n",
+            "- 修改 Rust 后运行 `cargo fmt --check`。\n",
+            "- 修改 CLI 或 skill-management 行为后运行 `cargo test`。\n"
+        )
+        .to_string(),
+    }
 }
 
 fn write_file(path: &Path, content: &[u8]) -> Result<()> {
@@ -488,54 +561,52 @@ fn write_file_if_missing(path: &Path, content: &[u8], report: &mut InitReport) -
     Ok(())
 }
 
-fn create_context_index(project: &Path, report: &mut InitReport) -> Result<()> {
+fn create_context_index(
+    project: &Path,
+    language: InitLanguage,
+    report: &mut InitReport,
+) -> Result<()> {
     create_dir(project.join("docs").join("context"), false, report)?;
     write_file_if_missing(
         &context_readme_path(project),
-        context_index_content().as_bytes(),
-        report,
-    )?;
-    write_file_if_missing(
-        &context_readme_zh_path(project),
-        context_index_zh_content().as_bytes(),
+        context_index_content(language).as_bytes(),
         report,
     )
 }
 
-fn context_index_content() -> String {
-    concat!(
-        "# Project Context Index\n\n",
-        "Read this directory first when starting a new model thread in this project.\n\n",
-        "Keep this file short. It is an index, not a full knowledge base.\n\n",
-        "## Reading Order\n\n",
-        "1. `AGENTS.md` for repository-level agent instructions, when present.\n",
-        "2. `docs/project-brief.md` for product direction.\n",
-        "3. `docs/skill-layout.md` for Codeseed-managed skill layout, when relevant.\n",
-        "4. Other focused docs only when the task needs them.\n\n",
-        "## Maintenance\n\n",
-        "- Add links here when durable project context is created elsewhere.\n",
-        "- Prefer focused documents over long all-in-one context files.\n",
-        "- Remove stale links quickly.\n"
-    )
-    .to_string()
-}
-
-fn context_index_zh_content() -> String {
-    concat!(
-        "# 项目上下文索引\n\n",
-        "在这个项目中开启新的模型 thread 时，先阅读这个目录。\n\n",
-        "保持本文件简短。它是索引，不是完整知识库。\n\n",
-        "## 阅读顺序\n\n",
-        "1. 如果存在 `AGENTS.md`，先阅读仓库级 agent 指令。\n",
-        "2. 阅读 `docs/project-brief.zh-CN.md` 了解产品方向。\n",
-        "3. 相关时阅读 `docs/skill-layout.zh-CN.md` 了解 Codeseed 管理的 skill 目录结构。\n",
-        "4. 只在任务需要时继续阅读其它聚焦文档。\n\n",
-        "## 维护规则\n\n",
-        "- 当其它位置产生长期项目上下文时，在这里增加链接。\n",
-        "- 优先使用聚焦文档，避免维护超长的单文件上下文。\n",
-        "- 及时移除过期链接。\n"
-    )
-    .to_string()
+pub(crate) fn context_index_content(language: InitLanguage) -> String {
+    match language {
+        InitLanguage::En => concat!(
+            "# Project Context Index\n\n",
+            "Read this directory first when starting a new model thread in this project.\n\n",
+            "Keep this file short. It is an index, not a full knowledge base.\n\n",
+            "## Reading Order\n\n",
+            "1. `AGENTS.md` for repository-level agent instructions, when present.\n",
+            "2. `docs/project-brief.md` for product direction.\n",
+            "3. `docs/skill-layout.md` for Codeseed-managed skill layout, when relevant.\n",
+            "4. Other focused docs only when the task needs them.\n\n",
+            "## Maintenance\n\n",
+            "- Add links here when durable project context is created elsewhere.\n",
+            "- Prefer focused documents over long all-in-one context files.\n",
+            "- Remove stale links quickly.\n"
+        )
+        .to_string(),
+        InitLanguage::ZhCn => concat!(
+            "# 项目上下文索引\n\n",
+            "在这个项目中开启新的模型 thread 时，先阅读这个目录。\n\n",
+            "保持本文件简短。它是索引，不是完整知识库。\n\n",
+            "## 阅读顺序\n\n",
+            "1. 如果存在 `AGENTS.md`，先阅读仓库级 agent 指令。\n",
+            "2. 阅读 `docs/project-brief.zh-CN.md` 了解产品方向。\n",
+            "3. 相关时阅读 `docs/skill-layout.zh-CN.md` 了解 Codeseed 管理的 skill 目录结构。\n",
+            "4. 只在任务需要时继续阅读其它聚焦文档。\n\n",
+            "## 维护规则\n\n",
+            "- 当其它位置产生长期项目上下文时，在这里增加链接。\n",
+            "- 优先使用聚焦文档，避免维护超长的单文件上下文。\n",
+            "- 及时移除过期链接。\n"
+        )
+        .to_string(),
+    }
 }
 
 fn create_symlink(target: &Path, link: &Path, force: bool) -> Result<()> {
@@ -591,7 +662,7 @@ fn platform_symlink(target: &Path, link: &Path) -> std::io::Result<()> {
 mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    use crate::cli::InitCommand;
+    use crate::cli::{InitCommand, InitLanguage};
 
     use super::{relative_path, run};
 
@@ -603,6 +674,7 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: false,
+            language: InitLanguage::En,
             force: false,
         };
 
@@ -610,7 +682,7 @@ mod tests {
 
         assert!(project.join(".agent/skills/common").is_dir());
         assert!(project.join("docs/context/README.md").is_file());
-        assert!(project.join("docs/context/README.zh-CN.md").is_file());
+        assert!(!project.join("docs/context/README.zh-CN.md").exists());
         assert!(project.join(".agent/skills/codex").is_dir());
         assert!(project.join(".agent/skills/claude").is_dir());
         assert!(project.join(".agent/skills/cursor").is_dir());
@@ -672,6 +744,7 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: true,
             no_links: true,
+            language: InitLanguage::En,
             force: false,
         };
 
@@ -684,6 +757,44 @@ mod tests {
         assert!(!project.join(".claude").exists());
         assert!(!project.join(".cursor").exists());
         assert!(!project.join("AGENTS.md").exists());
+
+        std::fs::remove_dir_all(project).ok();
+    }
+
+    #[test]
+    fn init_uses_selected_chinese_language_for_generated_instructions() {
+        let project = temp_project_dir();
+        let command = InitCommand {
+            agent_dir: ".agent".into(),
+            codeseed_dir: ".codeseed".into(),
+            no_presets: false,
+            no_links: false,
+            language: InitLanguage::ZhCn,
+            force: false,
+        };
+
+        run(&project, &command).expect("init should succeed");
+
+        let context = std::fs::read_to_string(project.join("docs/context/README.md"))
+            .expect("context index should be readable");
+        let skill = std::fs::read_to_string(
+            project.join(".agent/skills/common/codeseed-skill-author/SKILL.md"),
+        )
+        .expect("skill should be readable");
+        let manifest = std::fs::read_to_string(
+            project.join(".agent/skills/common/codeseed-skill-author/skill.toml"),
+        )
+        .expect("manifest should be readable");
+        let state =
+            std::fs::read_to_string(project.join(".codeseed/state.json")).expect("state exists");
+
+        assert!(context.contains("项目上下文索引"));
+        assert!(skill.contains("工作流程"));
+        assert!(!project
+            .join(".agent/skills/common/codeseed-skill-author/SKILL.zh-CN.md")
+            .exists());
+        assert!(!manifest.contains("localized_entry_"));
+        assert!(state.contains("\"language\": \"zh-CN\""));
 
         std::fs::remove_dir_all(project).ok();
     }

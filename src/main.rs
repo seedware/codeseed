@@ -34,10 +34,15 @@ fn main() {
                 println!("Update plan: {}", report.plan);
             }
         }),
-        Command::Remove(command) => {
-            println!("codeseed rm: project={:?} {command:?}", cli.project);
-            Ok(())
-        }
+        Command::Remove(command) => codeseed::remove::run(&cli.project, &command).map(|report| {
+            println!("Removed skill {}", report.removed_skill);
+            println!("removed paths: {}", report.removed_paths.len());
+            println!("pruned dirs: {}", report.pruned_dirs.len());
+            println!(
+                "updated state: {}",
+                if report.updated_state { "yes" } else { "no" }
+            );
+        }),
         Command::Doctor(command) => {
             println!("codeseed doctor: project={:?} {command:?}", cli.project);
             Ok(())
@@ -46,10 +51,15 @@ fn main() {
             println!("codeseed sync: project={:?} {command:?}", cli.project);
             Ok(())
         }
-        Command::Clear(command) => {
-            println!("codeseed clear: project={:?} {command:?}", cli.project);
-            Ok(())
-        }
+        Command::Clear(command) => codeseed::clear::run(&cli.project, &command).map(|report| {
+            if report.dry_run {
+                println!("Clear plan: {} paths", report.planned_paths.len());
+            } else {
+                println!("Cleared Codeseed-managed state");
+                println!("removed paths: {}", report.removed_paths.len());
+                println!("pruned dirs: {}", report.pruned_dirs.len());
+            }
+        }),
     };
 
     if let Err(error) = result {
