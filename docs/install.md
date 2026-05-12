@@ -34,6 +34,25 @@ From this repository:
 ./scripts/install.sh --local
 ```
 
+## Update Codeseed
+
+Use the CLI update command to update the `codeseed` executable itself. Run a dry run first when you want to inspect the installer plan:
+
+```bash
+codeseed update --dry-run
+codeseed update
+```
+
+`codeseed update` reuses the local `scripts/install.sh` when it is run from a Codeseed source checkout. Otherwise it downloads and runs the configured install script. The default installer target remains `~/.codeseed/bin/codeseed`.
+
+The shell-script installer can also be rerun directly:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
+```
+
+Updating the executable does not automatically rewrite project-local skills. Refresh project skills separately from the project root; see [skill-layout.md](skill-layout.md#refreshing-project-skills).
+
 ## Options
 
 ```bash

@@ -85,3 +85,29 @@ AGENTS.md
 
 广义 Agent Skills 约定只要求 `SKILL.md`。Codeseed 额外使用 `skill.toml` 记录本地管理元数据；当 skill 有面向用户的文档时，也保留 `SKILL.zh-CN.md`。
 
+## 刷新项目 Skills
+
+项目 skills 存放在项目目录内，所以更新全局的 `codeseed` 可执行文件不会自动改变已经初始化过的项目。请在项目根目录刷新项目内容。
+
+对于当前已实现的 preset 来源，使用 `--force` 重新安装该 preset：
+
+```bash
+codeseed add preset:<skill-id> --force
+```
+
+例如：
+
+```bash
+codeseed add preset:codeseed-context-index --force
+```
+
+刷新后，检查已安装 skill 列表和生成的兼容入口：
+
+```bash
+codeseed list --installed
+ls -l .claude/skills .cursor/rules
+```
+
+对于 Cursor rules，每个 `.cursor/rules/<skill-id>.mdc` 都应该是指向 `.agent/generated/cursor-rules/<skill-id>.mdc` 的软链接。对于 Claude Code，每个 `.claude/skills/<skill-id>` 都应该指向 `.agent/skills/common/<skill-id>`。
+
+如果当前安装版本已经支持这些命令，`codeseed doctor --fix` 可以安全修复生成目录或兼容软链接问题，`codeseed sync --check` 可以在不改写文件的情况下检查记录的生成状态。

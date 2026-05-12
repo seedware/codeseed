@@ -34,6 +34,25 @@ curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/s
 ./scripts/install.sh --local
 ```
 
+## 更新 Codeseed
+
+使用 CLI 更新命令更新 `codeseed` 可执行文件本身。想先确认安装计划时，先执行 dry run：
+
+```bash
+codeseed update --dry-run
+codeseed update
+```
+
+当命令在 Codeseed 源码仓库中执行时，`codeseed update` 会复用本地 `scripts/install.sh`。否则它会下载并执行配置的安装脚本。默认安装目标仍然是 `~/.codeseed/bin/codeseed`。
+
+也可以直接重新运行 shell 安装脚本：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
+```
+
+更新可执行文件不会自动重写项目内 skills。请在项目根目录单独刷新项目 skills；见 [skill-layout.zh-CN.md](skill-layout.zh-CN.md#刷新项目-skills)。
+
 ## 选项
 
 ```bash

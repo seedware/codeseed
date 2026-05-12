@@ -16,6 +16,30 @@ Built-in preset skills live in [presets/](presets/).
 curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
+## Update
+
+Update the `codeseed` executable:
+
+```bash
+codeseed update --dry-run
+codeseed update
+```
+
+Refresh an installed preset skill in a project:
+
+```bash
+codeseed add preset:<skill-id> --force
+```
+
+Then verify the project-local generated entries:
+
+```bash
+codeseed list --installed
+ls -l .claude/skills .cursor/rules
+```
+
+More detail is in [docs/install.md](docs/install.md) for updating Codeseed itself and [docs/skill-layout.md](docs/skill-layout.md) for refreshing project skills and compatibility links.
+
 ## Planned Direction
 
 Codeseed will start as a local CLI that can initialize agent skill directories, install preset skills, create compatibility symlinks for common agents, diagnose installed skills, and keep enough deterministic state to sync skill setup across Git checkouts.

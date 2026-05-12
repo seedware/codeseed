@@ -85,3 +85,29 @@ Each skill directory should be compatible with the Agent Skills shape:
 
 Only `SKILL.md` is required by the broader Agent Skills convention. Codeseed additionally uses `skill.toml` for local management metadata, and keeps `SKILL.zh-CN.md` when the skill has user-facing documentation.
 
+## Refreshing Project Skills
+
+Project skills are stored inside the project, so updating the global `codeseed` executable does not automatically change an initialized project. Refresh the project from its root directory.
+
+For the currently implemented preset source, reinstall the preset with `--force`:
+
+```bash
+codeseed add preset:<skill-id> --force
+```
+
+For example:
+
+```bash
+codeseed add preset:codeseed-context-index --force
+```
+
+After refreshing, verify the installed skill list and generated compatibility entries:
+
+```bash
+codeseed list --installed
+ls -l .claude/skills .cursor/rules
+```
+
+For Cursor rules, each `.cursor/rules/<skill-id>.mdc` entry should be a symlink to `.agent/generated/cursor-rules/<skill-id>.mdc`. For Claude Code, each `.claude/skills/<skill-id>` entry should point at `.agent/skills/common/<skill-id>`.
+
+If the command is available in the installed version, `codeseed doctor --fix` can repair safe generated-directory or compatibility-link issues, and `codeseed sync --check` can check recorded generated state without rewriting files.

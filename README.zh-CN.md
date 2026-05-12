@@ -14,6 +14,30 @@ Codeseed 是一个用于在项目中管理 agent skills 的命令行工具。
 curl -fsSL https://raw.githubusercontent.com/seedware/codeseed/refs/heads/main/scripts/install.sh | sh
 ```
 
+## 更新
+
+更新 `codeseed` 可执行文件本身：
+
+```bash
+codeseed update --dry-run
+codeseed update
+```
+
+刷新项目中已安装的预置 skill：
+
+```bash
+codeseed add preset:<skill-id> --force
+```
+
+然后检查项目内生成入口：
+
+```bash
+codeseed list --installed
+ls -l .claude/skills .cursor/rules
+```
+
+更多细节见 [docs/install.zh-CN.md](docs/install.zh-CN.md) 中的 Codeseed 本体更新说明，以及 [docs/skill-layout.zh-CN.md](docs/skill-layout.zh-CN.md) 中的项目 skill 和兼容软链接刷新说明。
+
 ## 规划方向
 
 Codeseed 会先从一个本地 CLI 开始：它可以初始化 agent skill 目录，安装预置 skill，为常见 agent 创建兼容软链接，诊断已安装的 skill，并记录足够确定性的状态，以便通过 Git 在多个本地检出目录之间同步 skill 配置。
