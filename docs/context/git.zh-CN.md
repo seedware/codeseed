@@ -24,6 +24,8 @@ gitee   git@gitee.com:seedware/codeseed.git
 
 remote 操作使用已安装的 `codeseed-multi-git-remote` skill。
 
+如果用户要求 push 或保存并推送，但没有指定单个 remote，应将当前分支推送到这个镜像仓库的所有已配置 push remotes。逐个 remote 执行 push。
+
 执行 push、pull、fetch、add remote 或 remove remote 前：
 
 ```bash
@@ -32,5 +34,4 @@ git remote -v
 git branch -vv
 ```
 
-向多个 remotes push 时逐个执行；如果失败，说明失败的是哪个 remote。
-
+如果失败，说明失败的是哪个 remote。如果某个 remote 拒绝非 fast-forward push，先 fetch 并检查该 remote，再做集成；除非用户明确要求，否则不要 force-push。

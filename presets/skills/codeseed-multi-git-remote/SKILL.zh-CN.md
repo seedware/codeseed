@@ -31,6 +31,8 @@ metadata:
 4. 优先使用非交互式 Git 命令。
 5. 向多个 remotes push 时，应逐个 remote 执行；如果某个命令失败，需要说明失败的是哪个 remote。
 6. 如果工作区有未提交变更，在 pull 或 rebase 前必须提醒用户。
+7. 在镜像仓库中，如果用户只说 `push`、“保存并推送”或其它发布工作的话，但没有指定单个 remote，应默认把所有已配置且可 push 的 remotes 作为目标。
+8. 如果某个 remote 因为非 fast-forward 拒绝 push，先 fetch 并检查该 remote，再做集成；除非用户明确要求，否则不要 force-push。
 
 ## 常用命令
 
@@ -65,14 +67,14 @@ git fetch gitee
 将当前分支 push 到多个 remotes：
 
 ```bash
-git push github HEAD
+git push origin HEAD
 git push gitee HEAD
 ```
 
 将指定分支 push 到多个 remotes，并在合适时设置 upstream：
 
 ```bash
-git push -u github BRANCH
+git push -u origin BRANCH
 git push gitee BRANCH
 ```
 
@@ -83,6 +85,5 @@ git push gitee BRANCH
 3. 按用户要求添加、删除或更新 remotes。
 4. 从所有相关 remotes fetch。
 5. 对比 branch tracking 状态。
-6. 只有在目标 branch 和 remote 明确后，才执行 push 或 pull。
+6. 如果用户指定了单个 remote，只对该 remote 执行 push 或 pull；如果用户没有指定单个 remote，且仓库有多个已配置的 push remotes，则逐个 push 相关 remotes。
 7. 总结每个 remote 操作和结果。
-

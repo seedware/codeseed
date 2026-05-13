@@ -3,7 +3,9 @@ use std::path::{Path, PathBuf};
 
 use crate::cli::{InitCommand, InitLanguage};
 use crate::error::{CodeseedError, Result};
-use crate::presets::{BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR};
+use crate::presets::{
+    embedded_preset_files, BUILT_IN_PRESET_SKILL_IDS, DEFAULT_PRESET_SKILL_IDS, PRESET_SKILLS_DIR,
+};
 
 const COMMON_TARGET: &str = "common";
 const AGENT_TARGETS: &[&str] = &["common", "codex", "claude", "cursor"];
@@ -292,20 +294,86 @@ pub(crate) fn install_preset_skill(
         ));
     }
 
-    let source = preset_skill_source(skill_id);
     let destination = agent_skill_path(agent_dir, skill_id);
 
-    copy_dir(&source, &destination, force, language)
+    if let Some(source) = local_preset_skill_source(skill_id) {
+        copy_dir(&source, &destination, force, language)
+    } else {
+        copy_embedded_preset_skill(skill_id, &destination, force, language)
+    }
 }
 
-fn preset_skill_source(skill_id: &str) -> PathBuf {
+fn local_preset_skill_source(skill_id: &str) -> Option<PathBuf> {
     let local_source = current_dir_or_dot().join(PRESET_SKILLS_DIR).join(skill_id);
     if local_source.is_dir() {
-        return local_source;
+        return Some(local_source);
     }
-    Path::new(env!("CARGO_MANIFEST_DIR"))
+    let manifest_source = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join(PRESET_SKILLS_DIR)
-        .join(skill_id)
+        .join(skill_id);
+    manifest_source.is_dir().then_some(manifest_source)
+}
+
+fn copy_embedded_preset_skill(
+    skill_id: &str,
+    destination: &Path,
+    force: bool,
+    language: InitLanguage,
+) -> Result<()> {
+    if destination.exists() {
+        if force {
+            fs::remove_dir_all(destination)
+                .map_err(|source| CodeseedError::io(destination, source))?;
+        } else {
+            return Ok(());
+        }
+    }
+
+    fs::create_dir_all(destination).map_err(|source| CodeseedError::io(destination, source))?;
+
+    let files = embedded_preset_files(skill_id).ok_or_else(|| {
+        CodeseedError::conflict(skill_id, "does not have embedded preset content")
+    })?;
+    for file in files {
+        let Some(destination_file) =
+            localized_embedded_destination_file(files, file.path, language)
+        else {
+            continue;
+        };
+        let path = destination.join(destination_file);
+        if file.path == "skill.toml" {
+            write_file(
+                &path,
+                localized_manifest_content_from_str(file.content).as_bytes(),
+            )?;
+        } else {
+            write_file(&path, file.content.as_bytes())?;
+        }
+    }
+
+    Ok(())
+}
+
+fn localized_embedded_destination_file(
+    files: &[crate::presets::PresetFile],
+    source_path: &str,
+    language: InitLanguage,
+) -> Option<String> {
+    if source_path.ends_with(".zh-CN.md") {
+        return match language {
+            InitLanguage::En => None,
+            InitLanguage::ZhCn => {
+                Some(source_path.trim_end_matches(".zh-CN.md").to_string() + ".md")
+            }
+        };
+    }
+    if language == InitLanguage::ZhCn && source_path.ends_with(".md") {
+        let localized_path = source_path.trim_end_matches(".md").to_string() + ".zh-CN.md";
+        if files.iter().any(|file| file.path == localized_path) {
+            return None;
+        }
+    }
+    Some(source_path.to_string())
 }
 
 fn copy_dir(source: &Path, destination: &Path, force: bool, language: InitLanguage) -> Result<()> {
@@ -368,12 +436,16 @@ fn localized_destination_file_name(
 
 fn localized_manifest_content(path: &Path, _language: InitLanguage) -> Result<String> {
     let content = fs::read_to_string(path).map_err(|source| CodeseedError::io(path, source))?;
+    Ok(localized_manifest_content_from_str(&content))
+}
+
+fn localized_manifest_content_from_str(content: &str) -> String {
     let content = content
         .lines()
         .filter(|line| !line.trim_start().starts_with("localized_entry_"))
         .collect::<Vec<_>>()
         .join("\n");
-    Ok(format!("{content}\n"))
+    format!("{content}\n")
 }
 
 fn list_common_skills(agent_dir: &Path) -> Result<Vec<String>> {
@@ -525,6 +597,8 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
             "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
             "- Canonical skills live under `.agent/skills/`.\n",
             "- Codeseed metadata lives under `.codeseed/`.\n",
+            "- When a task matches an installed skill, read that skill's `skill.toml` and `SKILL.md` before acting.\n",
+            "- For Git remote, branch, commit, push, pull, or fetch work, read `docs/context/git.md` and use `.agent/skills/common/codeseed-multi-git-remote/SKILL.md` when present.\n",
             "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n\n",
             "## Verification\n\n",
             "- Run `cargo fmt --check` after Rust edits.\n",
@@ -538,6 +612,8 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
             "- 开启新 thread 或项目背景不清楚时，先阅读 `docs/context/README.md`。\n",
             "- Canonical skills live under `.agent/skills/`.\n",
             "- Codeseed metadata lives under `.codeseed/`.\n",
+            "- 当任务匹配已安装 skill 时，行动前先阅读该 skill 的 `skill.toml` 和 `SKILL.md`。\n",
+            "- 处理 Git remote、branch、commit、push、pull 或 fetch 前，先阅读 `docs/context/git.md`；如果存在 `.agent/skills/common/codeseed-multi-git-remote/SKILL.md`，使用该 skill。\n",
             "- 修改 skill 文件前，先检查对应的 `skill.toml` 和 `SKILL.md`。\n\n",
             "## Verification\n\n",
             "- 修改 Rust 后运行 `cargo fmt --check`。\n",

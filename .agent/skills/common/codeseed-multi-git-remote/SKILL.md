@@ -31,6 +31,8 @@ This skill covers:
 4. Prefer non-interactive Git commands.
 5. When pushing to multiple remotes, push one remote at a time and report which remote failed if any command fails.
 6. If the working tree is dirty, warn before pulling or rebasing.
+7. In a mirrored repository, when the user asks to `push`, "save and push", or otherwise publish work without naming a single remote, treat all configured push-capable remotes as the intended targets.
+8. If a remote rejects a push because it is not a fast-forward, fetch and inspect that remote before integrating; never force-push unless explicitly requested.
 
 ## Common Commands
 
@@ -65,14 +67,14 @@ git fetch gitee
 Push the current branch to multiple remotes:
 
 ```bash
-git push github HEAD
+git push origin HEAD
 git push gitee HEAD
 ```
 
 Push a named branch to multiple remotes and set upstream when appropriate:
 
 ```bash
-git push -u github BRANCH
+git push -u origin BRANCH
 git push gitee BRANCH
 ```
 
@@ -83,6 +85,5 @@ git push gitee BRANCH
 3. Add, remove, or update remotes as requested.
 4. Fetch from all relevant remotes.
 5. Compare branch tracking state.
-6. Push or pull only after the target branch and remote are clear.
+6. If the user named one remote, push or pull only that remote. If they did not name one remote and the repository has multiple configured push remotes, push each relevant remote one at a time.
 7. Summarize each remote action and its result.
-
