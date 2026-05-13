@@ -1,6 +1,7 @@
 ---
 name: codeseed-multi-git-remote
 description: 管理同一个仓库的多个 Git 远程仓库，包括添加、删除、fetch、pull，以及向 GitHub、Gitee 等多个 remote push。
+alwaysApply: true
 license: MIT
 compatibility: 适用于 Codeseed 管理的项目 skills 以及兼容 Agent Skills 的客户端。
 triggers:
