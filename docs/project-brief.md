@@ -190,7 +190,7 @@ Preset skills are part of the normal skill source model:
 3. `codeseed rm <skill>` removes an installed preset skill the same way it removes any other managed skill.
 4. `codeseed doctor` validates installed preset skills with the same manifest rules as other skills.
 
-Each preset skill should include `skill.toml`, `SKILL.md`, and `SKILL.zh-CN.md`.
+Each preset skill should include `skill.toml` and a single `SKILL.md`. Current preset skills use Chinese content in `SKILL.md` instead of parallel localized skill documents.
 
 ## Skill Source Model
 

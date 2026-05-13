@@ -1,19 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::cli::InitLanguage;
 use crate::error::{CodeseedError, Result};
-
-pub(crate) fn read_language_or_default(codeseed_dir: &Path) -> InitLanguage {
-    let path = codeseed_dir.join("state.json");
-    let Ok(content) = fs::read_to_string(path) else {
-        return InitLanguage::En;
-    };
-    match json_string_field(&content, "language").as_deref() {
-        Some("zh-CN") | Some("zh-cn") | Some("zh") => InitLanguage::ZhCn,
-        _ => InitLanguage::En,
-    }
-}
 
 pub(crate) fn read_installed_skill_ids(codeseed_dir: &Path) -> Result<Vec<String>> {
     let path = codeseed_dir.join("state.json");

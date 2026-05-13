@@ -6,7 +6,7 @@ use crate::add::list_common_skills;
 use crate::cli::RemoveCommand;
 use crate::error::{CodeseedError, Result};
 use crate::init::{normalize_project, write_state_file};
-use crate::state::{read_installed_skill_ids, read_language_or_default};
+use crate::state::read_installed_skill_ids;
 
 const DEFAULT_AGENT_DIR: &str = ".agent";
 const DEFAULT_CODESEED_DIR: &str = ".codeseed";
@@ -23,7 +23,6 @@ pub fn run(project: &Path, command: &RemoveCommand) -> Result<RemoveReport> {
     let project = normalize_project(project);
     let agent_dir = project.join(DEFAULT_AGENT_DIR);
     let codeseed_dir = project.join(DEFAULT_CODESEED_DIR);
-    let language = read_language_or_default(&codeseed_dir);
     let skill_id = resolve_skill_id(&agent_dir, &codeseed_dir, &command.skill, command.force)?;
 
     let mut report = RemoveReport {
@@ -73,7 +72,6 @@ pub fn run(project: &Path, command: &RemoveCommand) -> Result<RemoveReport> {
             Path::new(DEFAULT_AGENT_DIR),
             Path::new(DEFAULT_CODESEED_DIR),
             &installed_skills,
-            language,
         )?;
         report.updated_state = true;
     } else if !command.force {
@@ -213,7 +211,7 @@ pub(crate) fn prune_empty_dirs(paths: &[PathBuf], pruned_dirs: &mut Vec<PathBuf>
 mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    use crate::cli::{InitCommand, InitLanguage, RemoveCommand};
+    use crate::cli::{InitCommand, RemoveCommand};
     use crate::init::run as init_run;
 
     use super::run;
@@ -226,7 +224,6 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: false,
-            language: InitLanguage::En,
             force: false,
         };
         init_run(&project, &init).expect("init should succeed");
@@ -268,7 +265,6 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: true,
-            language: InitLanguage::En,
             force: false,
         };
         init_run(&project, &init).expect("init should succeed");
@@ -296,7 +292,6 @@ mod tests {
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: true,
-            language: InitLanguage::En,
             force: false,
         };
         init_run(&project, &init).expect("init should succeed");

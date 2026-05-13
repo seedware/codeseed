@@ -22,8 +22,7 @@ The current ecosystem does not have one universal project directory used by ever
 │   │   ├── common/
 │   │   │   └── <skill-id>/
 │   │   │       ├── skill.toml
-│   │   │       ├── SKILL.md
-│   │   │       └── SKILL.zh-CN.md
+│   │   │       └── SKILL.md
 │   │   ├── codex/
 │   │   ├── claude/
 │   │   └── cursor/
@@ -77,13 +76,12 @@ Each skill directory should be compatible with the Agent Skills shape:
 <skill-id>/
 ├── SKILL.md
 ├── skill.toml
-├── SKILL.zh-CN.md
 ├── scripts/
 ├── references/
 └── assets/
 ```
 
-Only `SKILL.md` is required by the broader Agent Skills convention. Codeseed additionally uses `skill.toml` for local management metadata, and keeps `SKILL.zh-CN.md` when the skill has user-facing documentation.
+Only `SKILL.md` is required by the broader Agent Skills convention. Codeseed additionally uses `skill.toml` for local management metadata. Codeseed-managed skills keep a single `SKILL.md`; current preset skills use Chinese content in that entry file instead of parallel localized skill documents.
 
 ## Skill Activation
 

@@ -16,8 +16,7 @@ presets/
 └── skills/
     └── <skill-id>/
         ├── skill.toml
-        ├── SKILL.md
-        └── SKILL.zh-CN.md
+        └── SKILL.md
 ```
 
 ## 来源语法
@@ -48,7 +47,6 @@ name = "Codeseed Skill Author"
 version = "0.1.0"
 target = "common"
 entry = "SKILL.md"
-localized_entry_zh_cn = "SKILL.zh-CN.md"
 ```
 
 `target` 使用与 CLI 相同的目标名称：`common`、`codex`、`claude` 或 `cursor`。

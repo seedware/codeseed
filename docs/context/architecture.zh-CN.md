@@ -38,10 +38,9 @@ docs/context/
 `.codeseed/state.json` 当前记录：
 
 1. schema version；
-2. 选定的说明语言；
-3. agent 目录；
-4. Codeseed 元数据目录；
-5. 已安装 skill 的 id、source 和 target。
+2. agent 目录；
+3. Codeseed 元数据目录；
+4. 已安装 skill 的 id、source 和 target。
 
 保持该文件确定、可审查。它预期被提交到 Git。
 

@@ -38,10 +38,9 @@ Tool-native directories are generated compatibility entries. `.agent/skills/comm
 `.codeseed/state.json` currently records:
 
 1. schema version;
-2. selected instruction language;
-3. agent directory;
-4. Codeseed metadata directory;
-5. installed skill ids, sources, and targets.
+2. agent directory;
+3. Codeseed metadata directory;
+4. installed skill ids, sources, and targets.
 
 Keep this file deterministic and reviewable. It is intended to be committed.
 

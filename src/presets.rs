@@ -22,10 +22,6 @@ const CONTEXT_INDEX_FILES: &[PresetFile] = &[
         path: "SKILL.md",
         content: include_str!("../presets/skills/codeseed-context-index/SKILL.md"),
     },
-    PresetFile {
-        path: "SKILL.zh-CN.md",
-        content: include_str!("../presets/skills/codeseed-context-index/SKILL.zh-CN.md"),
-    },
 ];
 
 const MULTI_GIT_REMOTE_FILES: &[PresetFile] = &[
@@ -36,10 +32,6 @@ const MULTI_GIT_REMOTE_FILES: &[PresetFile] = &[
     PresetFile {
         path: "SKILL.md",
         content: include_str!("../presets/skills/codeseed-multi-git-remote/SKILL.md"),
-    },
-    PresetFile {
-        path: "SKILL.zh-CN.md",
-        content: include_str!("../presets/skills/codeseed-multi-git-remote/SKILL.zh-CN.md"),
     },
 ];
 
@@ -52,10 +44,6 @@ const PREBUILT_RELEASE_FILES: &[PresetFile] = &[
         path: "SKILL.md",
         content: include_str!("../presets/skills/codeseed-prebuilt-release/SKILL.md"),
     },
-    PresetFile {
-        path: "SKILL.zh-CN.md",
-        content: include_str!("../presets/skills/codeseed-prebuilt-release/SKILL.zh-CN.md"),
-    },
 ];
 
 const SKILL_AUTHOR_FILES: &[PresetFile] = &[
@@ -66,10 +54,6 @@ const SKILL_AUTHOR_FILES: &[PresetFile] = &[
     PresetFile {
         path: "SKILL.md",
         content: include_str!("../presets/skills/codeseed-skill-author/SKILL.md"),
-    },
-    PresetFile {
-        path: "SKILL.zh-CN.md",
-        content: include_str!("../presets/skills/codeseed-skill-author/SKILL.zh-CN.md"),
     },
 ];
 
@@ -132,7 +116,7 @@ mod tests {
     fn all_built_in_presets_are_embedded() {
         for skill_id in BUILT_IN_PRESET_SKILL_IDS {
             let files = embedded_preset_files(skill_id).expect("preset files should be embedded");
-            assert_eq!(files.len(), 3);
+            assert_eq!(files.len(), 2);
             assert!(embedded_preset_manifest(skill_id).is_some());
         }
     }

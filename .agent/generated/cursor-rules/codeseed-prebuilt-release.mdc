@@ -1,5 +1,5 @@
 ---
-description: Publish Codeseed prebuilt release archives for the install script. Use when building, packaging, uploading, or verifying codeseed-<target>.tar.gz release assets, initially for the current host platform.
+description: 发布安装脚本使用的 Codeseed 预编译 release 包。用于构建、打包、上传或验证 codeseed-<target>.tar.gz release asset，初始阶段只覆盖当前宿主平台。
 globs:
 alwaysApply: false
 ---

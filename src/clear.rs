@@ -3,7 +3,7 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use crate::add::list_common_skills;
-use crate::cli::{ClearCommand, InitLanguage};
+use crate::cli::ClearCommand;
 use crate::error::{CodeseedError, Result};
 use crate::init::{agents_md_content, context_index_content, normalize_project};
 use crate::remove::prune_empty_dirs;
@@ -55,23 +55,12 @@ pub fn run(project: &Path, command: &ClearCommand) -> Result<ClearReport> {
 
     remove_exact_generated_file(
         &project.join("AGENTS.md"),
-        &[
-            agents_md_content(InitLanguage::En),
-            agents_md_content(InitLanguage::ZhCn),
-        ],
+        &[agents_md_content()],
         &mut report.removed_paths,
     )?;
     remove_exact_generated_file(
         &project.join("docs").join("context").join("README.md"),
-        &[
-            context_index_content(InitLanguage::En),
-            context_index_content(InitLanguage::ZhCn),
-        ],
-        &mut report.removed_paths,
-    )?;
-    remove_exact_generated_file(
-        &project.join("docs").join("context").join("README.zh-CN.md"),
-        &[context_index_content(InitLanguage::ZhCn)],
+        &[context_index_content()],
         &mut report.removed_paths,
     )?;
 
@@ -146,23 +135,12 @@ fn planned_paths(
     }
     push_if_exact_generated_file(
         &project.join("AGENTS.md"),
-        &[
-            agents_md_content(InitLanguage::En),
-            agents_md_content(InitLanguage::ZhCn),
-        ],
+        &[agents_md_content()],
         &mut paths,
     );
     push_if_exact_generated_file(
         &project.join("docs").join("context").join("README.md"),
-        &[
-            context_index_content(InitLanguage::En),
-            context_index_content(InitLanguage::ZhCn),
-        ],
-        &mut paths,
-    );
-    push_if_exact_generated_file(
-        &project.join("docs").join("context").join("README.zh-CN.md"),
-        &[context_index_content(InitLanguage::ZhCn)],
+        &[context_index_content()],
         &mut paths,
     );
     push_if_exists(agent_dir, &mut paths);
@@ -251,7 +229,7 @@ fn remove_dir_or_file(path: &Path, removed_paths: &mut Vec<PathBuf>) -> Result<(
 mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    use crate::cli::{ClearCommand, InitCommand, InitLanguage};
+    use crate::cli::{ClearCommand, InitCommand};
     use crate::init::run as init_run;
 
     use super::run;
@@ -259,7 +237,7 @@ mod tests {
     #[test]
     fn clear_dry_run_reports_plan_without_removing() {
         let project = temp_project_dir();
-        init_project(&project, InitLanguage::En);
+        init_project(&project);
         let command = ClearCommand {
             agent_dir: ".agent".into(),
             codeseed_dir: ".codeseed".into(),
@@ -284,7 +262,7 @@ mod tests {
     #[test]
     fn clear_removes_managed_state_and_generated_links() {
         let project = temp_project_dir();
-        init_project(&project, InitLanguage::ZhCn);
+        init_project(&project);
         let command = ClearCommand {
             agent_dir: ".agent".into(),
             codeseed_dir: ".codeseed".into(),
@@ -306,13 +284,12 @@ mod tests {
         std::fs::remove_dir_all(project).ok();
     }
 
-    fn init_project(project: &std::path::Path, language: InitLanguage) {
+    fn init_project(project: &std::path::Path) {
         let init = InitCommand {
             agent_dir: ".agent".into(),
             codeseed_dir: ".codeseed".into(),
             no_presets: false,
             no_links: false,
-            language,
             force: false,
         };
         init_run(project, &init).expect("init should succeed");

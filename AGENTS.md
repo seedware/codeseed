@@ -11,7 +11,7 @@ This repository is managed by Codeseed for project-local agent skills.
 - When a task matches a skill's `name`, `description`, `triggers`, or `default_behavior`, read that skill's `skill.toml` and full `SKILL.md` before acting.
 - Do not enumerate individual skills here. Skill-specific trigger rules and default behavior belong in the skill's own `SKILL.md` front matter.
 - Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.
-- Every user-facing Markdown skill document should have a Chinese version when practical.
+- Codeseed-managed skills use a single Chinese `SKILL.md`; do not add parallel localized skill documents.
 
 ## Verification
 

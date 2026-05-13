@@ -188,7 +188,7 @@ Codeseed 把内置预置 skills 存放在 `presets/skills/`。
 3. `codeseed rm <skill>` 可以像移除其它受管理 skill 一样移除已安装的预置 skill。
 4. `codeseed doctor` 使用与其它 skill 相同的 manifest 规则验证已安装的预置 skill。
 
-每个预置 skill 都应该包含 `skill.toml`、`SKILL.md` 和 `SKILL.zh-CN.md`。
+每个预置 skill 都应该包含 `skill.toml` 和唯一的 `SKILL.md`。当前预置 skills 在 `SKILL.md` 中使用中文内容，而不是维护并行的多语言 skill 文档。
 
 ## Skill 来源模型
 

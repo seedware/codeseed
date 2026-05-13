@@ -1,5 +1,5 @@
 ---
-description: Maintain docs/context as a compact project context index so new model threads can quickly discover architecture, constraints, module design, Git rules, reusable components, and other working context.
+description: 维护 docs/context 作为简洁的项目上下文索引，让新的模型 thread 能快速发现架构、约束、模块设计、Git 规则、可复用组件等工作背景。
 globs:
 alwaysApply: false
 ---

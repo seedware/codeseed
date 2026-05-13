@@ -1,5 +1,5 @@
 ---
-description: Create, review, and improve Codeseed-managed agent skills. Use when working on skill.toml, SKILL.md, preset skills, or project skill metadata.
+description: 创建、审查和改进 Codeseed 管理的 agent skills。适用于 skill.toml、SKILL.md、preset skills 或项目 skill 元数据相关工作。
 globs:
 alwaysApply: false
 ---

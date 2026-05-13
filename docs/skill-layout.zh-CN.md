@@ -22,8 +22,7 @@ Codeseed 使用一个项目内的规范 skill 布局，然后为特定 agent 工
 │   │   ├── common/
 │   │   │   └── <skill-id>/
 │   │   │       ├── skill.toml
-│   │   │       ├── SKILL.md
-│   │   │       └── SKILL.zh-CN.md
+│   │   │       └── SKILL.md
 │   │   ├── codex/
 │   │   ├── claude/
 │   │   └── cursor/
@@ -77,13 +76,12 @@ AGENTS.md
 <skill-id>/
 ├── SKILL.md
 ├── skill.toml
-├── SKILL.zh-CN.md
 ├── scripts/
 ├── references/
 └── assets/
 ```
 
-广义 Agent Skills 约定只要求 `SKILL.md`。Codeseed 额外使用 `skill.toml` 记录本地管理元数据；当 skill 有面向用户的文档时，也保留 `SKILL.zh-CN.md`。
+广义 Agent Skills 约定只要求 `SKILL.md`。Codeseed 额外使用 `skill.toml` 记录本地管理元数据。Codeseed-managed skills 只保留一个 `SKILL.md`；当前 preset skills 在这个入口文件中使用中文内容，而不是维护并行的多语言 skill 文档。
 
 ## Skill 激活
 

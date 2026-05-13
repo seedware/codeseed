@@ -4,7 +4,6 @@ name = "Codeseed Multi Git Remote"
 version = "0.1.0"
 target = "common"
 entry = "SKILL.md"
-localized_entry_zh_cn = "SKILL.zh-CN.md"
 
 [source]
 type = "preset"

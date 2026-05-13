@@ -1,71 +1,71 @@
 ---
 name: codeseed-prebuilt-release
-description: Publish Codeseed prebuilt release archives for the install script. Use when building, packaging, uploading, or verifying codeseed-<target>.tar.gz release assets, initially for the current host platform.
+description: 发布安装脚本使用的 Codeseed 预编译 release 包。用于构建、打包、上传或验证 codeseed-<target>.tar.gz release asset，初始阶段只覆盖当前宿主平台。
 license: MIT
-compatibility: Designed for Codeseed releases that use scripts/install.sh prebuilt downloads.
+compatibility: 适用于使用 scripts/install.sh 下载预编译包的 Codeseed 发布流程。
 metadata:
   codeseed.version: "0.1.0"
 ---
 
-# Codeseed Prebuilt Release
+# Codeseed 预编译发布
 
-Use this skill when publishing a Codeseed prebuilt archive consumed by `scripts/install.sh`.
+当需要发布 `scripts/install.sh` 使用的 Codeseed 预编译压缩包时，使用这个 skill。
 
-This workflow intentionally starts with the current host platform only. Do not imply that other platforms were built until cross-platform packaging is added.
+这个流程刻意先只覆盖当前宿主平台。在跨平台打包补齐前，不要暗示其他平台已经构建完成。
 
-## Archive Contract
+## 压缩包约定
 
-`scripts/install.sh` downloads release assets named:
+`scripts/install.sh` 会下载这样的 release asset：
 
 ```text
 codeseed-<target>.tar.gz
 ```
 
-The current target names are:
+当前 target 名称为：
 
 1. `aarch64-apple-darwin`
 2. `x86_64-apple-darwin`
 3. `aarch64-unknown-linux-gnu`
 4. `x86_64-unknown-linux-gnu`
 
-The archive must contain an executable file named `codeseed`.
+压缩包中必须包含名为 `codeseed` 的可执行文件。
 
-## Workflow
+## 工作流程
 
-1. Confirm the release tag or version. Prefer tags such as `v0.1.0`.
-2. Check the working tree and avoid packaging unrelated local changes.
-3. Run `cargo fmt --check` and `cargo test` before publishing.
-4. Build and package the current host platform:
+1. 确认 release tag 或版本。推荐使用 `v0.1.0` 这类 tag。
+2. 检查工作区，避免把无关本地改动打进包里。
+3. 发布前运行 `cargo fmt --check` 和 `cargo test`。
+4. 构建并打包当前宿主平台：
 
 ```bash
 presets/skills/codeseed-prebuilt-release/scripts/package-current-target.sh
 ```
 
-If the skill is already installed in the project, this equivalent path is also valid:
+如果这个 skill 已经安装到当前项目，也可以使用等价路径：
 
 ```bash
 .agent/skills/common/codeseed-prebuilt-release/scripts/package-current-target.sh
 ```
 
-5. Inspect the archive before upload:
+5. 上传前检查压缩包内容：
 
 ```bash
 tar -tzf dist/codeseed-<target>.tar.gz
 ```
 
-6. Upload the asset to the GitHub release:
+6. 上传 asset 到 GitHub release：
 
 ```bash
 gh release upload <tag> dist/codeseed-<target>.tar.gz --clobber
 ```
 
-If the release does not exist yet:
+如果 release 还不存在：
 
 ```bash
 gh release create <tag> dist/codeseed-<target>.tar.gz --title <tag>
 ```
 
-7. Verify the install path against the uploaded asset:
+7. 使用已上传 asset 验证安装路径：
 
 ```bash
 tmp_home="$(mktemp -d)"
@@ -73,6 +73,6 @@ CODESEED_HOME="$tmp_home" CODESEED_INSTALL_MODE=prebuilt ./scripts/install.sh --
 "$tmp_home/bin/codeseed" --version
 ```
 
-## Reporting
+## 汇报要求
 
-Report the uploaded tag, target, asset name, and install verification result. Also state plainly that only the current host platform was published when that is the case.
+汇报已上传的 tag、target、asset 名称和安装验证结果。如果本次只发布了当前宿主平台，也要明确说明。
