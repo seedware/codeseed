@@ -11,6 +11,8 @@ metadata:
 
 当一个仓库同时镜像到多个 Git remote，并且用户希望配置、检查或同步这些 remote 时，使用这个 skill。
 
+核心默认规则：在镜像仓库中，未限定 remote 的 Git push 请求表示将当前分支推送到所有已配置的 push remotes。这个规则应该能从仓库指令中直接发现，不应依赖 agent 记得之前的对话。
+
 ## 范围
 
 这个 skill 覆盖：

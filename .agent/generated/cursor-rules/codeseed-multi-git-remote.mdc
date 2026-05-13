@@ -1,5 +1,5 @@
 ---
-description: Use when managing multiple Git remotes, including adding, removing, fetching, pulling, or pushing across mirrors such as GitHub and Gitee.
+description: Use for Git remote, fetch, pull, or push work in mirrored repositories. An unqualified push means pushing the current branch to every configured push remote.
 globs:
 alwaysApply: false
 ---

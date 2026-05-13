@@ -24,7 +24,9 @@ gitee   git@gitee.com:seedware/codeseed.git
 
 remote 操作使用已安装的 `codeseed-multi-git-remote` skill。
 
-如果用户要求 push 或保存并推送，但没有指定单个 remote，应将当前分支推送到这个镜像仓库的所有已配置 push remotes。逐个 remote 执行 push。
+未限定 remote 的 Git push 请求，包括“push”或“保存并推送”，表示将当前分支推送到这个镜像仓库的所有已配置 push remotes。这是仓库默认规则，不是可选的 skill 偏好。
+
+逐个 remote 执行 push。
 
 执行 push、pull、fetch、add remote 或 remove remote 前：
 

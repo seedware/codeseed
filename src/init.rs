@@ -573,7 +573,7 @@ fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Pa
 fn cursor_rule_description(skill_id: &str) -> &'static str {
     match skill_id {
         "codeseed-multi-git-remote" => {
-            "Use when managing multiple Git remotes, including adding, removing, fetching, pulling, or pushing across mirrors such as GitHub and Gitee."
+            "Use for Git remote, fetch, pull, or push work in mirrored repositories. An unqualified push means pushing the current branch to every configured push remote."
         }
         "codeseed-skill-author" => {
             "Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata."
@@ -593,6 +593,11 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
         InitLanguage::En => concat!(
             "# Codeseed Agent Instructions\n\n",
             "This repository is managed by Codeseed for project-local agent skills.\n\n",
+            "## Git\n\n",
+            "- This repository may be mirrored to multiple Git remotes.\n",
+            "- An unqualified Git push request, including \"push\" or \"save and push\", means push the current branch to every configured push remote.\n",
+            "- Push remotes one at a time and report which remote failed if any push fails.\n",
+            "- Do not force-push or rewrite remote history unless the user explicitly asks for that exact destructive operation.\n\n",
             "## Skills\n\n",
             "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
             "- Canonical skills live under `.agent/skills/`.\n",
@@ -608,6 +613,11 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
         InitLanguage::ZhCn => concat!(
             "# Codeseed Agent Instructions\n\n",
             "This repository is managed by Codeseed for project-local agent skills.\n\n",
+            "## Git\n\n",
+            "- 这个仓库可能同时镜像到多个 Git remotes。\n",
+            "- 未限定 remote 的 Git push 请求，包括“push”或“保存并推送”，表示将当前分支推送到所有已配置的 push remotes。\n",
+            "- 逐个 remote 执行 push；如果某个 push 失败，说明失败的是哪个 remote。\n",
+            "- 除非用户明确要求具体的破坏性操作，否则不要 force-push 或改写远程历史。\n\n",
             "## Skills\n\n",
             "- 开启新 thread 或项目背景不清楚时，先阅读 `docs/context/README.md`。\n",
             "- Canonical skills live under `.agent/skills/`.\n",

@@ -2,6 +2,13 @@
 
 This repository is managed by Codeseed for project-local agent skills.
 
+## Git
+
+- This repository is mirrored to multiple Git remotes.
+- An unqualified Git push request, including "push" or "save and push", means push the current branch to every configured push remote.
+- Push remotes one at a time and report which remote failed if any push fails.
+- Do not force-push or rewrite remote history unless the user explicitly asks for that exact destructive operation.
+
 ## Skills
 
 - Read `docs/context/README.md` first when starting a new thread or when project background is unclear.

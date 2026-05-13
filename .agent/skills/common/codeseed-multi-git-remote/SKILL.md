@@ -11,6 +11,8 @@ metadata:
 
 Use this skill when a repository is mirrored across multiple Git remotes and the user wants help keeping those remotes configured and synchronized.
 
+Core default: in a mirrored repository, an unqualified Git push request means push the current branch to every configured push remote. This rule should be discoverable from repository instructions and should not depend on an agent remembering prior conversation.
+
 ## Scope
 
 This skill covers:

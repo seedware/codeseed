@@ -24,7 +24,9 @@ The local `main` branch currently tracks `gitee/main`.
 
 Use the installed `codeseed-multi-git-remote` skill for remote operations.
 
-If the user asks to push or save and push without naming one remote, push the current branch to every configured push remote for this mirrored repository. Push remotes one at a time.
+An unqualified Git push request, including "push" or "save and push", means push the current branch to every configured push remote for this mirrored repository. This is the default repository policy, not an optional skill preference.
+
+Push remotes one at a time.
 
 Before push, pull, fetch, add, or remove remote work:
 
