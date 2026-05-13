@@ -1,8 +1,0 @@
----
-description: 发布安装脚本使用的 Codeseed 预编译 release 包。用于构建、打包、上传或验证 codeseed-<target>.tar.gz release asset，初始阶段只覆盖当前宿主平台。
-globs:
-alwaysApply: false
----
-
-Use the Codeseed-managed skill at `.agent/skills/common/codeseed-prebuilt-release/SKILL.md`.
-Follow its front matter and instructions when this task matches its description, triggers, or default behavior.
