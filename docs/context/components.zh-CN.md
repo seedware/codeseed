@@ -29,8 +29,9 @@ Preset 内容位于 `presets/skills/<skill-id>/`。
 
 1. `codeseed-skill-author`
 2. `codeseed-context-index`
-3. `codeseed-multi-git-remote`
-4. `codeseed-prebuilt-release`
+3. `codeseed-chinese-code-comments`
+4. `codeseed-multi-git-remote`
+5. `codeseed-prebuilt-release`
 
 ## 生成的兼容入口
 

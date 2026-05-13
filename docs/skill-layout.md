@@ -98,15 +98,17 @@ triggers:
   - another matching cue
 default_behavior:
   - Default action or interpretation when the trigger is ambiguous.
+alwaysApply: false
 ---
 ```
 
 Rules:
 
-1. `AGENTS.md` should tell agents to scan installed skills and match against `name`, `description`, `triggers`, and `default_behavior`.
+1. `AGENTS.md` should tell agents to scan installed skills, always load skills with `alwaysApply: true`, and match against `name`, `description`, `triggers`, and `default_behavior`.
 2. `AGENTS.md` should not enumerate individual skills or their task-specific behavior.
 3. Skill-specific routing and default behavior belong in the skill's own front matter and full `SKILL.md` body.
 4. Generated compatibility entries should point back to the canonical skill instead of becoming the source of truth.
+5. `alwaysApply: true` is optional and is copied into generated Cursor rules for skills that must load on every request.
 
 ## Refreshing Project Skills
 

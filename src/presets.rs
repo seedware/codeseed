@@ -1,9 +1,14 @@
 pub const PRESET_SKILLS_DIR: &str = "presets/skills";
 pub const PRESET_SOURCE_PREFIX: &str = "preset:";
-pub const DEFAULT_PRESET_SKILL_IDS: &[&str] = &["codeseed-skill-author", "codeseed-context-index"];
+pub const DEFAULT_PRESET_SKILL_IDS: &[&str] = &[
+    "codeseed-skill-author",
+    "codeseed-context-index",
+    "codeseed-chinese-code-comments",
+];
 pub const BUILT_IN_PRESET_SKILL_IDS: &[&str] = &[
     "codeseed-skill-author",
     "codeseed-context-index",
+    "codeseed-chinese-code-comments",
     "codeseed-multi-git-remote",
     "codeseed-prebuilt-release",
 ];
@@ -57,9 +62,21 @@ const SKILL_AUTHOR_FILES: &[PresetFile] = &[
     },
 ];
 
+const CHINESE_CODE_COMMENTS_FILES: &[PresetFile] = &[
+    PresetFile {
+        path: "skill.toml",
+        content: include_str!("../presets/skills/codeseed-chinese-code-comments/skill.toml"),
+    },
+    PresetFile {
+        path: "SKILL.md",
+        content: include_str!("../presets/skills/codeseed-chinese-code-comments/SKILL.md"),
+    },
+];
+
 pub fn embedded_preset_files(skill_id: &str) -> Option<&'static [PresetFile]> {
     match skill_id {
         "codeseed-context-index" => Some(CONTEXT_INDEX_FILES),
+        "codeseed-chinese-code-comments" => Some(CHINESE_CODE_COMMENTS_FILES),
         "codeseed-multi-git-remote" => Some(MULTI_GIT_REMOTE_FILES),
         "codeseed-prebuilt-release" => Some(PREBUILT_RELEASE_FILES),
         "codeseed-skill-author" => Some(SKILL_AUTHOR_FILES),
@@ -85,7 +102,11 @@ mod tests {
     fn default_preset_ids_are_explicit() {
         assert_eq!(
             DEFAULT_PRESET_SKILL_IDS,
-            ["codeseed-skill-author", "codeseed-context-index"]
+            [
+                "codeseed-skill-author",
+                "codeseed-context-index",
+                "codeseed-chinese-code-comments"
+            ]
         );
     }
 
@@ -96,6 +117,7 @@ mod tests {
             [
                 "codeseed-skill-author",
                 "codeseed-context-index",
+                "codeseed-chinese-code-comments",
                 "codeseed-multi-git-remote",
                 "codeseed-prebuilt-release"
             ]

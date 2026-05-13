@@ -98,15 +98,17 @@ triggers:
   - 其它匹配线索
 default_behavior:
   - 当触发语义存在歧义时的默认动作或解释。
+alwaysApply: false
 ---
 ```
 
 规则：
 
-1. `AGENTS.md` 应要求 agents 扫描已安装 skills，并匹配 `name`、`description`、`triggers` 和 `default_behavior`。
+1. `AGENTS.md` 应要求 agents 扫描已安装 skills，总是加载 `alwaysApply: true` 的 skill，并匹配 `name`、`description`、`triggers` 和 `default_behavior`。
 2. `AGENTS.md` 不应枚举单个 skill 或其任务特定行为。
 3. 特定 skill 的路由规则和默认行为应写在该 skill 自己的 front matter 和完整 `SKILL.md` 正文中。
 4. 生成的兼容入口应指回规范 skill，不应成为事实来源。
+5. `alwaysApply: true` 是可选项，会被复制到生成的 Cursor rule，用于必须每次加载的 skill。
 
 ## 刷新项目 Skills
 

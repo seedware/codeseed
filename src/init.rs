@@ -448,21 +448,22 @@ pub(crate) fn create_compatibility_entries_for_skills(
 
 fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Path) -> Result<()> {
     let absolute_skill_path = agent_skill_path(agent_dir, skill_id);
+    let skill_md_path = absolute_skill_path.join("SKILL.md");
     let skill_path = project_relative(&absolute_skill_path, project);
-    let description =
-        skill_frontmatter_value(&absolute_skill_path.join("SKILL.md"), "description")?
-            .unwrap_or_else(|| "Use the matching Codeseed-managed project skill.".to_string());
+    let description = skill_frontmatter_value(&skill_md_path, "description")?
+        .unwrap_or_else(|| "Use the matching Codeseed-managed project skill.".to_string());
+    let always_apply = skill_frontmatter_bool(&skill_md_path, "alwaysApply")?.unwrap_or(false);
     let content = format!(
         concat!(
             "---\n",
             "description: {0}\n",
             "globs:\n",
-            "alwaysApply: false\n",
+            "alwaysApply: {2}\n",
             "---\n\n",
             "Use the Codeseed-managed skill at `{1}/SKILL.md`.\n",
             "Follow its front matter and instructions when this task matches its description, triggers, or default behavior.\n"
         ),
-        description, skill_path
+        description, skill_path, always_apply
     );
     write_file(path, content.as_bytes())
 }
@@ -470,6 +471,11 @@ fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Pa
 fn skill_frontmatter_value(path: &Path, key: &str) -> Result<Option<String>> {
     let content = fs::read_to_string(path).map_err(|source| CodeseedError::io(path, source))?;
     Ok(frontmatter_value(&content, key))
+}
+
+fn skill_frontmatter_bool(path: &Path, key: &str) -> Result<Option<bool>> {
+    let value = skill_frontmatter_value(path, key)?;
+    Ok(value.and_then(|value| parse_frontmatter_bool(&value)))
 }
 
 fn frontmatter_value(content: &str, key: &str) -> Option<String> {
@@ -490,6 +496,15 @@ fn frontmatter_value(content: &str, key: &str) -> Option<String> {
     None
 }
 
+// Cursor 的 alwaysApply 只接受布尔语义；非布尔值保持未设置，避免误启用全局规则。
+fn parse_frontmatter_bool(value: &str) -> Option<bool> {
+    match value.trim().trim_matches('"') {
+        "true" => Some(true),
+        "false" => Some(false),
+        _ => None,
+    }
+}
+
 pub(crate) fn agents_md_content() -> String {
     concat!(
         "# Codeseed Agent Instructions\n\n",
@@ -499,6 +514,7 @@ pub(crate) fn agents_md_content() -> String {
         "- Canonical skills live under `.agent/skills/`.\n",
         "- Codeseed metadata lives under `.codeseed/`.\n",
         "- Discover installed skills by scanning `.agent/skills/common/*/skill.toml` and each skill's `SKILL.md` front matter.\n",
+        "- If a skill's `SKILL.md` front matter has `alwaysApply: true`, read that skill's `skill.toml` and full `SKILL.md` at the start of every task.\n",
         "- When a task matches a skill's `name`, `description`, `triggers`, or `default_behavior`, read that skill's `skill.toml` and full `SKILL.md` before acting.\n",
         "- Do not enumerate individual skills here. Skill-specific trigger rules and default behavior belong in the skill's own `SKILL.md` front matter.\n",
         "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n\n",
@@ -632,6 +648,9 @@ mod tests {
         assert!(project
             .join(".agent/skills/common/codeseed-context-index/SKILL.md")
             .is_file());
+        assert!(project
+            .join(".agent/skills/common/codeseed-chinese-code-comments/SKILL.md")
+            .is_file());
         assert!(project.join(".codeseed/state.json").is_file());
         assert!(project
             .join(".claude/skills/codeseed-skill-author")
@@ -655,18 +674,26 @@ mod tests {
         let agents_md =
             std::fs::read_to_string(project.join("AGENTS.md")).expect("AGENTS.md is readable");
         assert!(agents_md.contains("Discover installed skills by scanning"));
+        assert!(agents_md.contains("alwaysApply: true"));
         assert!(!agents_md.contains("codeseed-multi-git-remote"));
         let cursor_rule = std::fs::read_to_string(
             project.join(".agent/generated/cursor-rules/codeseed-skill-author.mdc"),
         )
         .expect("cursor rule is readable");
         assert!(cursor_rule.contains("创建、审查和改进 Codeseed 管理的 agent skills"));
+        assert!(cursor_rule.contains("alwaysApply: false"));
         assert!(cursor_rule.contains("description, triggers, or default behavior"));
+        let always_apply_cursor_rule = std::fs::read_to_string(
+            project.join(".agent/generated/cursor-rules/codeseed-chinese-code-comments.mdc"),
+        )
+        .expect("always-apply cursor rule is readable");
+        assert!(always_apply_cursor_rule.contains("alwaysApply: true"));
         assert_eq!(
             report.installed_skills,
             vec![
                 "codeseed-skill-author".to_string(),
-                "codeseed-context-index".to_string()
+                "codeseed-context-index".to_string(),
+                "codeseed-chinese-code-comments".to_string()
             ]
         );
 
