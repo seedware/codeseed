@@ -85,6 +85,31 @@ AGENTS.md
 
 广义 Agent Skills 约定只要求 `SKILL.md`。Codeseed 额外使用 `skill.toml` 记录本地管理元数据；当 skill 有面向用户的文档时，也保留 `SKILL.zh-CN.md`。
 
+## Skill 激活
+
+Agents 应通过统一入口发现 skills，而不是在 `AGENTS.md` 中硬编码单个 skill 名称。
+
+每个 `SKILL.md` 应在 front matter 中声明激活元数据：
+
+```yaml
+---
+name: example-skill
+description: 简短说明什么时候使用这个 skill。
+triggers:
+  - 用户表达或任务类型
+  - 其它匹配线索
+default_behavior:
+  - 当触发语义存在歧义时的默认动作或解释。
+---
+```
+
+规则：
+
+1. `AGENTS.md` 应要求 agents 扫描已安装 skills，并匹配 `name`、`description`、`triggers` 和 `default_behavior`。
+2. `AGENTS.md` 不应枚举单个 skill 或其任务特定行为。
+3. 特定 skill 的路由规则和默认行为应写在该 skill 自己的 front matter 和完整 `SKILL.md` 正文中。
+4. 生成的兼容入口应指回规范 skill，不应成为事实来源。
+
 ## 刷新项目 Skills
 
 项目 skills 存放在项目目录内，所以更新全局的 `codeseed` 可执行文件不会自动改变已经初始化过的项目。请在项目根目录刷新项目内容。

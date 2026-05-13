@@ -1,8 +1,8 @@
 ---
-description: Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata.
+description: Create, review, and improve Codeseed-managed agent skills. Use when working on skill.toml, SKILL.md, preset skills, or project skill metadata.
 globs:
 alwaysApply: false
 ---
 
 Use the Codeseed-managed skill at `.agent/skills/common/codeseed-skill-author/SKILL.md`.
-Follow its instructions when this task matches the description above.
+Follow its front matter and instructions when this task matches its description, triggers, or default behavior.

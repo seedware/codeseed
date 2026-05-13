@@ -553,8 +553,11 @@ pub(crate) fn create_compatibility_entries_for_skills(
 }
 
 fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Path) -> Result<()> {
-    let skill_path = project_relative(&agent_skill_path(agent_dir, skill_id), project);
-    let description = cursor_rule_description(skill_id);
+    let absolute_skill_path = agent_skill_path(agent_dir, skill_id);
+    let skill_path = project_relative(&absolute_skill_path, project);
+    let description =
+        skill_frontmatter_value(&absolute_skill_path.join("SKILL.md"), "description")?
+            .unwrap_or_else(|| "Use the matching Codeseed-managed project skill.".to_string());
     let content = format!(
         concat!(
             "---\n",
@@ -563,29 +566,34 @@ fn write_cursor_rule(path: &Path, skill_id: &str, project: &Path, agent_dir: &Pa
             "alwaysApply: false\n",
             "---\n\n",
             "Use the Codeseed-managed skill at `{1}/SKILL.md`.\n",
-            "Follow its instructions when this task matches the description above.\n"
+            "Follow its front matter and instructions when this task matches its description, triggers, or default behavior.\n"
         ),
         description, skill_path
     );
     write_file(path, content.as_bytes())
 }
 
-fn cursor_rule_description(skill_id: &str) -> &'static str {
-    match skill_id {
-        "codeseed-multi-git-remote" => {
-            "Use for Git remote, fetch, pull, or push work in mirrored repositories. An unqualified push means pushing the current branch to every configured push remote."
-        }
-        "codeseed-skill-author" => {
-            "Use when creating, reviewing, or improving Codeseed-managed skills or project skill metadata."
-        }
-        "codeseed-context-index" => {
-            "Use when maintaining docs/context as a compact project context index for AI-assisted development."
-        }
-        "codeseed-prebuilt-release" => {
-            "Use when publishing Codeseed prebuilt release archives consumed by scripts/install.sh, starting with the current host platform."
-        }
-        _ => "Use the matching Codeseed-managed project skill.",
+fn skill_frontmatter_value(path: &Path, key: &str) -> Result<Option<String>> {
+    let content = fs::read_to_string(path).map_err(|source| CodeseedError::io(path, source))?;
+    Ok(frontmatter_value(&content, key))
+}
+
+fn frontmatter_value(content: &str, key: &str) -> Option<String> {
+    let mut lines = content.lines();
+    if lines.next()? != "---" {
+        return None;
     }
+    let prefix = format!("{key}:");
+    for line in lines {
+        if line == "---" {
+            return None;
+        }
+        let line = line.trim();
+        if let Some(value) = line.strip_prefix(&prefix) {
+            return Some(value.trim().trim_matches('"').to_string());
+        }
+    }
+    None
 }
 
 pub(crate) fn agents_md_content(language: InitLanguage) -> String {
@@ -593,17 +601,13 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
         InitLanguage::En => concat!(
             "# Codeseed Agent Instructions\n\n",
             "This repository is managed by Codeseed for project-local agent skills.\n\n",
-            "## Git\n\n",
-            "- This repository may be mirrored to multiple Git remotes.\n",
-            "- An unqualified Git push request, including \"push\" or \"save and push\", means push the current branch to every configured push remote.\n",
-            "- Push remotes one at a time and report which remote failed if any push fails.\n",
-            "- Do not force-push or rewrite remote history unless the user explicitly asks for that exact destructive operation.\n\n",
             "## Skills\n\n",
             "- If `docs/context/README.md` exists, read it first when starting a new thread or when project background is unclear.\n",
             "- Canonical skills live under `.agent/skills/`.\n",
             "- Codeseed metadata lives under `.codeseed/`.\n",
-            "- When a task matches an installed skill, read that skill's `skill.toml` and `SKILL.md` before acting.\n",
-            "- For Git remote, branch, commit, push, pull, or fetch work, read `docs/context/git.md` and use `.agent/skills/common/codeseed-multi-git-remote/SKILL.md` when present.\n",
+            "- Discover installed skills by scanning `.agent/skills/common/*/skill.toml` and each skill's `SKILL.md` front matter.\n",
+            "- When a task matches a skill's `name`, `description`, `triggers`, or `default_behavior`, read that skill's `skill.toml` and full `SKILL.md` before acting.\n",
+            "- Do not enumerate individual skills here. Skill-specific trigger rules and default behavior belong in the skill's own `SKILL.md` front matter.\n",
             "- Before changing skill files, inspect the matching `skill.toml` and `SKILL.md`.\n\n",
             "## Verification\n\n",
             "- Run `cargo fmt --check` after Rust edits.\n",
@@ -613,17 +617,13 @@ pub(crate) fn agents_md_content(language: InitLanguage) -> String {
         InitLanguage::ZhCn => concat!(
             "# Codeseed Agent Instructions\n\n",
             "This repository is managed by Codeseed for project-local agent skills.\n\n",
-            "## Git\n\n",
-            "- 这个仓库可能同时镜像到多个 Git remotes。\n",
-            "- 未限定 remote 的 Git push 请求，包括“push”或“保存并推送”，表示将当前分支推送到所有已配置的 push remotes。\n",
-            "- 逐个 remote 执行 push；如果某个 push 失败，说明失败的是哪个 remote。\n",
-            "- 除非用户明确要求具体的破坏性操作，否则不要 force-push 或改写远程历史。\n\n",
             "## Skills\n\n",
             "- 开启新 thread 或项目背景不清楚时，先阅读 `docs/context/README.md`。\n",
             "- Canonical skills live under `.agent/skills/`.\n",
             "- Codeseed metadata lives under `.codeseed/`.\n",
-            "- 当任务匹配已安装 skill 时，行动前先阅读该 skill 的 `skill.toml` 和 `SKILL.md`。\n",
-            "- 处理 Git remote、branch、commit、push、pull 或 fetch 前，先阅读 `docs/context/git.md`；如果存在 `.agent/skills/common/codeseed-multi-git-remote/SKILL.md`，使用该 skill。\n",
+            "- 通过扫描 `.agent/skills/common/*/skill.toml` 和每个 skill 的 `SKILL.md` front matter 来发现已安装 skills。\n",
+            "- 当任务匹配某个 skill 的 `name`、`description`、`triggers` 或 `default_behavior` 时，行动前先阅读该 skill 的 `skill.toml` 和完整 `SKILL.md`。\n",
+            "- 不要在这里枚举单个 skill。特定 skill 的触发规则和默认行为应写在该 skill 自己的 `SKILL.md` front matter 中。\n",
             "- 修改 skill 文件前，先检查对应的 `skill.toml` 和 `SKILL.md`。\n\n",
             "## Verification\n\n",
             "- 修改 Rust 后运行 `cargo fmt --check`。\n",
@@ -798,6 +798,16 @@ mod tests {
             )
         );
         assert!(project.join("AGENTS.md").is_file());
+        let agents_md =
+            std::fs::read_to_string(project.join("AGENTS.md")).expect("AGENTS.md is readable");
+        assert!(agents_md.contains("Discover installed skills by scanning"));
+        assert!(!agents_md.contains("codeseed-multi-git-remote"));
+        let cursor_rule = std::fs::read_to_string(
+            project.join(".agent/generated/cursor-rules/codeseed-skill-author.mdc"),
+        )
+        .expect("cursor rule is readable");
+        assert!(cursor_rule.contains("Create, review, and improve Codeseed-managed agent skills"));
+        assert!(cursor_rule.contains("description, triggers, or default behavior"));
         assert_eq!(
             report.installed_skills,
             vec![

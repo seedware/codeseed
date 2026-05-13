@@ -1,8 +1,8 @@
 ---
-description: Use when maintaining docs/context as a compact project context index for AI-assisted development.
+description: Maintain docs/context as a compact project context index so new model threads can quickly discover architecture, constraints, module design, Git rules, reusable components, and other working context.
 globs:
 alwaysApply: false
 ---
 
 Use the Codeseed-managed skill at `.agent/skills/common/codeseed-context-index/SKILL.md`.
-Follow its instructions when this task matches the description above.
+Follow its front matter and instructions when this task matches its description, triggers, or default behavior.

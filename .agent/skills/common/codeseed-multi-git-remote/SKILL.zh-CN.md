@@ -3,6 +3,16 @@ name: codeseed-multi-git-remote
 description: 管理同一个仓库的多个 Git 远程仓库，包括添加、删除、fetch、pull，以及向 GitHub、Gitee 等多个 remote push。
 license: MIT
 compatibility: 适用于 Codeseed 管理的项目 skills 以及兼容 Agent Skills 的客户端。
+triggers:
+  - git remote
+  - git fetch
+  - git pull
+  - git push
+  - 保存并推送
+  - 镜像仓库
+default_behavior:
+  - 在镜像仓库中，未限定 remote 的 Git push 请求表示将当前分支推送到所有已配置的 push remotes。
+  - 逐个 remote 执行 push；如果某个 push 失败，说明失败的是哪个 remote。
 metadata:
   codeseed.version: "0.1.0"
 ---
@@ -11,7 +21,7 @@ metadata:
 
 当一个仓库同时镜像到多个 Git remote，并且用户希望配置、检查或同步这些 remote 时，使用这个 skill。
 
-核心默认规则：在镜像仓库中，未限定 remote 的 Git push 请求表示将当前分支推送到所有已配置的 push remotes。这个规则应该能从仓库指令中直接发现，不应依赖 agent 记得之前的对话。
+核心默认规则：在镜像仓库中，未限定 remote 的 Git push 请求表示将当前分支推送到所有已配置的 push remotes。这个规则声明在本 skill 的 front matter 中，agent 可以通过通用 skill 激活规则发现。
 
 ## 范围
 

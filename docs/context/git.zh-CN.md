@@ -20,20 +20,6 @@ gitee   git@gitee.com:seedware/codeseed.git
 3. 不提交无关 dirty work。
 4. 修改 Rust 行为的提交前运行测试。
 
-## 多 Remote 工作
+## Skill 路由
 
-remote 操作使用已安装的 `codeseed-multi-git-remote` skill。
-
-未限定 remote 的 Git push 请求，包括“push”或“保存并推送”，表示将当前分支推送到这个镜像仓库的所有已配置 push remotes。这是仓库默认规则，不是可选的 skill 偏好。
-
-逐个 remote 执行 push。
-
-执行 push、pull、fetch、add remote 或 remove remote 前：
-
-```bash
-git status --short
-git remote -v
-git branch -vv
-```
-
-如果失败，说明失败的是哪个 remote。如果某个 remote 拒绝非 fast-forward push，先 fetch 并检查该 remote，再做集成；除非用户明确要求，否则不要 force-push。
+Git workflow 行为由 `.agent/skills/` 下已安装的 skills 声明。遵循 [AGENTS.md](../../AGENTS.md) 中的通用 skill 激活规则，不要在这个 context 文件中硬编码单个 skill 名称。

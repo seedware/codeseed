@@ -1,8 +1,8 @@
 ---
-description: Use for Git remote, fetch, pull, or push work in mirrored repositories. An unqualified push means pushing the current branch to every configured push remote.
+description: Manage multiple Git remotes for one repository, including adding, removing, fetching, pulling, and pushing across remotes such as GitHub and Gitee.
 globs:
 alwaysApply: false
 ---
 
 Use the Codeseed-managed skill at `.agent/skills/common/codeseed-multi-git-remote/SKILL.md`.
-Follow its instructions when this task matches the description above.
+Follow its front matter and instructions when this task matches its description, triggers, or default behavior.

@@ -20,20 +20,6 @@ The local `main` branch currently tracks `gitee/main`.
 3. Do not commit unrelated dirty work.
 4. Run tests before commits that change Rust behavior.
 
-## Multi-Remote Work
+## Skill Routing
 
-Use the installed `codeseed-multi-git-remote` skill for remote operations.
-
-An unqualified Git push request, including "push" or "save and push", means push the current branch to every configured push remote for this mirrored repository. This is the default repository policy, not an optional skill preference.
-
-Push remotes one at a time.
-
-Before push, pull, fetch, add, or remove remote work:
-
-```bash
-git status --short
-git remote -v
-git branch -vv
-```
-
-Report which remote fails if any command fails. If a remote rejects a non-fast-forward push, fetch and inspect that remote before integrating; never force-push unless explicitly requested.
+Git workflow behavior is declared by installed skills under `.agent/skills/`. Follow the generic skill activation rules in [AGENTS.md](../../AGENTS.md) instead of hard-coding individual skill names in this context file.

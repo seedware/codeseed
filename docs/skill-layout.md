@@ -85,6 +85,31 @@ Each skill directory should be compatible with the Agent Skills shape:
 
 Only `SKILL.md` is required by the broader Agent Skills convention. Codeseed additionally uses `skill.toml` for local management metadata, and keeps `SKILL.zh-CN.md` when the skill has user-facing documentation.
 
+## Skill Activation
+
+Agents should discover skills through a generic entrypoint rather than hard-coded skill names in `AGENTS.md`.
+
+Each `SKILL.md` should declare activation metadata in its front matter:
+
+```yaml
+---
+name: example-skill
+description: Short natural-language summary of when to use this skill.
+triggers:
+  - user phrase or task family
+  - another matching cue
+default_behavior:
+  - Default action or interpretation when the trigger is ambiguous.
+---
+```
+
+Rules:
+
+1. `AGENTS.md` should tell agents to scan installed skills and match against `name`, `description`, `triggers`, and `default_behavior`.
+2. `AGENTS.md` should not enumerate individual skills or their task-specific behavior.
+3. Skill-specific routing and default behavior belong in the skill's own front matter and full `SKILL.md` body.
+4. Generated compatibility entries should point back to the canonical skill instead of becoming the source of truth.
+
 ## Refreshing Project Skills
 
 Project skills are stored inside the project, so updating the global `codeseed` executable does not automatically change an initialized project. Refresh the project from its root directory.

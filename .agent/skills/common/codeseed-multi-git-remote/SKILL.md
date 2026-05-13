@@ -3,6 +3,16 @@ name: codeseed-multi-git-remote
 description: Manage multiple Git remotes for one repository, including adding, removing, fetching, pulling, and pushing across remotes such as GitHub and Gitee.
 license: MIT
 compatibility: Designed for Codeseed-managed project skills and Agent Skills compatible clients.
+triggers:
+  - git remote
+  - git fetch
+  - git pull
+  - git push
+  - save and push
+  - mirrored repository
+default_behavior:
+  - In a mirrored repository, an unqualified Git push request means push the current branch to every configured push remote.
+  - Push remotes one at a time and report which remote failed if any push fails.
 metadata:
   codeseed.version: "0.1.0"
 ---
@@ -11,7 +21,7 @@ metadata:
 
 Use this skill when a repository is mirrored across multiple Git remotes and the user wants help keeping those remotes configured and synchronized.
 
-Core default: in a mirrored repository, an unqualified Git push request means push the current branch to every configured push remote. This rule should be discoverable from repository instructions and should not depend on an agent remembering prior conversation.
+Core default: in a mirrored repository, an unqualified Git push request means push the current branch to every configured push remote. This rule is declared in this skill's front matter so agents can discover it through the generic skill activation rules.
 
 ## Scope
 
